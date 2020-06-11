@@ -30,11 +30,23 @@ jobs:
             dep ensure
         fi
 
-    - name: Build
-      run: go build -v .
+    - name: BuildLinux
+      run: go build -o itb_uploader.linux -v .
 
     - name: BuildWindows
-      run: (GOOS=windows GOARCH=386 go build -v .) 
+      run: (GOOS=windows GOARCH=386 go build -o itb_uploader.exe -v .) 
     
     - name: Test
       run: go test -v .
+
+    - name: Archive exe for linux
+        uses: actions/upload-artifact@v1
+        with:
+          name: itb_uploader_linux
+          path: itb_uploader.linux
+
+    - name: Archive exe for windows
+        uses: actions/upload-artifact@v1
+        with:
+          name: itb_uploader_windows
+          path: itb_uploader.exe
