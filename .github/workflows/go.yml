@@ -32,6 +32,9 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+    - name: BuildWindows
       run: (GOOS=windows GOARCH=386 go build -v .) 
+    
     - name: Test
       run: go test -v .
