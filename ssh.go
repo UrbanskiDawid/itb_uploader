@@ -2,9 +2,31 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"golang.org/x/crypto/ssh"
 )
+
+type SSHconfig struct {
+	user string
+	pass string
+	host string
+	port int
+}
+
+func loadConfig() SSHconfig {
+
+	var ret SSHconfig
+	ret.user = os.Getenv("SSH_USER")
+	ret.pass = os.Getenv("SSH_PASS")
+	ret.host = fmt.Sprintf("%s:%s", os.Getenv("SSH_HOST"), os.Getenv("SSH_PORT"))
+
+	if ret.user == "" || ret.pass == "" || ret.host == "" {
+		panic("enviroment configuration missing")
+	}
+
+	return ret
+}
 
 func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
 
@@ -28,18 +50,30 @@ func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
 	return client, session, nil
 }
 
-func remote(user string, pass string, hostname string, port int) string {
-	var cmd string = "ls /;"
+type RemoteCmd struct {
+	running bool
+	out     string
+}
 
-	client, session, err := connectToHost(user, pass, fmt.Sprintf("%s:%d", hostname, port))
-	if err != nil {
-		panic(err)
-	}
-	out, err := session.CombinedOutput(cmd)
-	if err != nil {
-		panic(err)
-	}
-	client.Close()
+var remoteCmd RemoteCmd
 
-	return string(out)
+func remote(cmd string) {
+
+	config := loadConfig()
+
+	// wait for the program to end in a goroutine
+	go func() {
+		client, session, err := connectToHost(config.user, config.pass, config.host)
+		if err != nil {
+			panic(err)
+		}
+		remoteCmd.running = true
+		out, err := session.CombinedOutput(cmd)
+		if err != nil {
+			panic(err)
+		}
+		client.Close()
+		remoteCmd.running = false
+		remoteCmd.out = string(out)
+	}()
 }

@@ -19,6 +19,7 @@ func startServer() {
 	http.HandleFunc("/", viewIndex)
 	http.HandleFunc("/get", viewGet)
 	http.HandleFunc("/run", viewRun)
+	http.HandleFunc("/ssh", viewSSH)
 	fmt.Println("starting server")
 	http.ListenAndServe(fmt.Sprintf(":%d", cPort), nil)
 }

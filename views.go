@@ -13,6 +13,7 @@ var html string = `
 <ul>
 <li><a href="/get">get</a></li>
 <li><a href="/run">run</a></li>
+<li><a href="/ssh">ssh</a></li>
 </ul>
 </html>
 `
@@ -33,6 +34,13 @@ func viewGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "Hello %d ", num)
+}
+
+func viewSSH(w http.ResponseWriter, r *http.Request) {
+	cmd := "python3 /home/dawid/cast.py ASSISTANT_VOICE/dave.mp3"
+	remote(cmd)
+	w.Header().Set("refresh", "1;url=/")
+	fmt.Fprint(w, "ssh running")
 }
 
 func viewRun(w http.ResponseWriter, r *http.Request) {
