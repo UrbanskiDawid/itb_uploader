@@ -52,7 +52,7 @@ func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
 	return client, session, nil
 }
 
-func remote(cmd string) (string, error) {
+func Remote(cmd string) (string, error) {
 
 	config := loadConfig()
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func run(cmd string) (string, error) {
+func Run(cmd string) (string, error) {
 
 	var out bytes.Buffer
 

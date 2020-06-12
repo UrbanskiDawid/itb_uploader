@@ -55,7 +55,7 @@ func viewSSH(w http.ResponseWriter, r *http.Request) {
 
 	remoteCmd.running = true
 	go func() {
-		ret, err := remote(cmd)
+		ret, err := Remote(cmd)
 		remoteCmd.running = false
 		if err == nil {
 			remoteCmd.out = ret
@@ -81,7 +81,7 @@ func viewRun(w http.ResponseWriter, r *http.Request) {
 
 	runCmd.running = true
 	go func() {
-		ret, err := run("date")
+		ret, err := Run("date")
 		if err == nil {
 			runCmd.out = ret
 		}
