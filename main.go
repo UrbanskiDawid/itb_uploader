@@ -7,14 +7,6 @@ import (
 
 var cPort int = 8080
 
-type Status struct {
-	text string
-	pid  int
-	num  int
-}
-
-var status Status
-
 func startServer() {
 	http.HandleFunc("/", viewIndex)
 	http.HandleFunc("/get", viewGet)
@@ -25,10 +17,5 @@ func startServer() {
 }
 
 func main() {
-
-	status.text = "start"
-	status.pid = 0
-	status.num = 0
-
 	startServer()
 }

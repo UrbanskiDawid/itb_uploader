@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -50,30 +52,20 @@ func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
 	return client, session, nil
 }
 
-type RemoteCmd struct {
-	running bool
-	out     string
-}
-
-var remoteCmd RemoteCmd
-
-func remote(cmd string) {
+func remote(cmd string) (string, error) {
 
 	config := loadConfig()
 
-	// wait for the program to end in a goroutine
-	go func() {
-		client, session, err := connectToHost(config.user, config.pass, config.host)
-		if err != nil {
-			panic(err)
-		}
-		remoteCmd.running = true
-		out, err := session.CombinedOutput(cmd)
-		if err != nil {
-			panic(err)
-		}
-		client.Close()
-		remoteCmd.running = false
-		remoteCmd.out = string(out)
-	}()
+	client, session, err := connectToHost(config.user, config.pass, config.host)
+	if err != nil {
+		panic(err)
+	}
+
+	var out bytes.Buffer
+	session.Stdin = strings.NewReader("")
+	session.Stdout = &out
+	err = session.Start(cmd)
+	session.Wait()
+	client.Close()
+	return out.String(), err
 }

@@ -7,23 +7,25 @@ import (
 	"strings"
 )
 
-type MyCmd struct {
-	cmd *exec.Cmd
-	out bytes.Buffer
-}
+func run(cmd string) (string, error) {
 
-func run(cmd string) MyCmd {
+	var out bytes.Buffer
 
-	var myCmd MyCmd
+	exe := exec.Command(cmd)
+	exe.Stdin = strings.NewReader("")
+	exe.Stdout = &out
 
-	myCmd.cmd = exec.Command(cmd)
-	myCmd.cmd.Stdin = strings.NewReader("")
-	myCmd.cmd.Stdout = &myCmd.out
-
-	err := myCmd.cmd.Start()
+	err := exe.Start()
 	if err != nil {
 		log.Fatal(err)
+		return "", err
 	}
 
-	return myCmd
+	err = exe.Wait()
+	if err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+
+	return out.String(), err
 }

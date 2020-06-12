@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
-
-var num int = 0
 
 var html string = `
 <html>
@@ -18,9 +15,19 @@ var html string = `
 </html>
 `
 
+type Status struct {
+	text string
+	num  int
+}
+
+var status Status
+
 func viewIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, html)
-	fmt.Fprintf(w, "status: %s num: %d pid: %d", status.text, status.num, status.pid)
+	fmt.Fprintf(w, "<p>status: %s</p>", status.text)
+	fmt.Fprintf(w, "<p>num: %d</p>", status.num)
+	fmt.Fprintf(w, "<p>runCmd: %t %s</p>", runCmd.running, runCmd.out)
+	fmt.Fprintf(w, "<p>sshCmd: %t %s</p>", remoteCmd.running, remoteCmd.out)
 }
 
 func viewGet(w http.ResponseWriter, r *http.Request) {
@@ -36,39 +43,52 @@ func viewGet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello %d ", num)
 }
 
+type RemoteCmd struct {
+	running bool
+	out     string
+}
+
+var remoteCmd RemoteCmd
+
 func viewSSH(w http.ResponseWriter, r *http.Request) {
 	cmd := "python3 /home/dawid/cast.py ASSISTANT_VOICE/dave.mp3"
-	remote(cmd)
+
+	remoteCmd.running = true
+	go func() {
+		ret, err := remote(cmd)
+		remoteCmd.running = false
+		if err == nil {
+			remoteCmd.out = ret
+		}
+	}()
+
 	w.Header().Set("refresh", "1;url=/")
 	fmt.Fprint(w, "ssh running")
 }
 
-var sshRunCmd MyCmd
+type MyCmd struct {
+	running bool
+	out     string
+}
+
+var runCmd MyCmd
 
 func viewRun(w http.ResponseWriter, r *http.Request) {
-	if status.pid != 0 {
+	if runCmd.running {
 		fmt.Fprint(w, "busy")
 		return
 	}
 
-	sshRunCmd = run("date")
-
-	status.text = ""
-	status.pid = sshRunCmd.cmd.Process.Pid
-	w.Header().Set("refresh", "2;url=/")
-	fmt.Fprint(w, "started")
-
-	fmt.Println("run begin")
-
-	// wait for the program to end in a goroutine
+	runCmd.running = true
 	go func() {
-		err := sshRunCmd.cmd.Wait()
-		if err != nil {
-			log.Fatal(err)
+		ret, err := run("date")
+		if err == nil {
+			runCmd.out = ret
 		}
-		fmt.Println("run end")
-		status.text = sshRunCmd.out.String()
-		status.pid = 0
-		print(status.text)
+		runCmd.running = false
 	}()
+
+	w.Header().Set("refresh", "2;url=/")
+	fmt.Println("run begin")
+	fmt.Fprint(w, "running")
 }
