@@ -12,9 +12,9 @@ type MyCmd struct {
 	out bytes.Buffer
 }
 
-var myCmd MyCmd
+func run(cmd string) MyCmd {
 
-func run(cmd string) {
+	var myCmd MyCmd
 
 	myCmd.cmd = exec.Command(cmd)
 	myCmd.cmd.Stdin = strings.NewReader("")
@@ -25,4 +25,5 @@ func run(cmd string) {
 		log.Fatal(err)
 	}
 
+	return myCmd
 }

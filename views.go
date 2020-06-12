@@ -43,16 +43,18 @@ func viewSSH(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ssh running")
 }
 
+var sshRunCmd MyCmd
+
 func viewRun(w http.ResponseWriter, r *http.Request) {
 	if status.pid != 0 {
 		fmt.Fprint(w, "busy")
 		return
 	}
 
-	run("date")
+	sshRunCmd = run("date")
 
 	status.text = ""
-	status.pid = myCmd.cmd.Process.Pid
+	status.pid = sshRunCmd.cmd.Process.Pid
 	w.Header().Set("refresh", "2;url=/")
 	fmt.Fprint(w, "started")
 
@@ -60,12 +62,12 @@ func viewRun(w http.ResponseWriter, r *http.Request) {
 
 	// wait for the program to end in a goroutine
 	go func() {
-		err := myCmd.cmd.Wait()
+		err := sshRunCmd.cmd.Wait()
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("run end")
-		status.text = myCmd.out.String()
+		status.text = sshRunCmd.out.String()
 		status.pid = 0
 		print(status.text)
 	}()
