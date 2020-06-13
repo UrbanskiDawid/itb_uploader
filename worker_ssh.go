@@ -3,40 +3,71 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
 
-func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func getAuthMethod(pass string) (ssh.AuthMethod, error) {
+
+	if fileExists(pass) {
+		key, err := ioutil.ReadFile(pass)
+		if err != nil {
+			return nil, err //log.Fatalf("unable to read private key: %v", err)
+		}
+
+		signer, err := ssh.ParsePrivateKey(key)
+		if err != nil {
+			return nil, err //log.Fatalf("unable to parse private key: %v", err)
+		}
+
+		return ssh.PublicKeys(signer), nil
+
+	}
+	return ssh.Password(pass), nil
+}
+
+func configureSSHforServer(serverName string) (*ssh.Client, error) {
+
+	server := getServerByNickName(serverName)
+
+	auth, err := getAuthMethod(server.Auth.Pass)
+	if err != nil {
+		return nil, err
+	}
 
 	sshConfig := &ssh.ClientConfig{
-		User: user,
-		Auth: []ssh.AuthMethod{ssh.Password(pass)},
+		User:            server.Auth.User,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Auth:            []ssh.AuthMethod{auth},
 	}
-	sshConfig.HostKeyCallback = ssh.InsecureIgnoreHostKey()
 
-	client, err := ssh.Dial("tcp", host, sshConfig)
+	host := fmt.Sprintf("%s:%d", server.Host, server.Port)
+	return ssh.Dial("tcp", host, sshConfig)
+}
+
+func executeSSH(cmd string, serverName string) (string, error) {
+
+	client, err := configureSSHforServer(serverName)
 	if err != nil {
-		return nil, nil, err
+		client.Close()
+		return "", err
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
 		client.Close()
-		return nil, nil, err
-	}
-
-	return client, session, nil
-}
-
-func executeSSH(cmd string, serverName string) (string, error) {
-
-	server := getServerByNickName(serverName)
-
-	client, session, err := connectToHost(server.Auth.User, server.Auth.Pass, fmt.Sprintf("%s:%d", server.Host, server.Port))
-	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	var out bytes.Buffer

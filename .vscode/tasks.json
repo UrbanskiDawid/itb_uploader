@@ -33,5 +33,15 @@
             "presentation": { "reveal": "never" },
             "problemMatcher": []
         },
+
+        {
+            "taskName": "request voice",     
+            "command": "curl",
+            "args": [
+                "localhost:8080/action/voice"
+            ],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
+        },
     ]
 }
