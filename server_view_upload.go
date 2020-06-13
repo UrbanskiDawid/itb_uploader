@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -54,17 +53,17 @@ func saveFile(r *http.Request) (string, error) {
 
 //ViewUploadFile save file
 func ViewUploadFile(w http.ResponseWriter, r *http.Request) {
-	log.Println("ViewUploadFile")
+	Log.Println("ViewUploadFile")
 	fileName, err := saveFile(r)
 	if err != nil {
 		fmt.Fprint(w, "error")
 		fmt.Println("File Upload: error", err)
-		log.Println("File Upload: error ", err)
+		Log.Println("File Upload: error ", err)
 		return
 	}
 
 	// return that we have successfully uploaded our file!
 	fmt.Printf("File Upload: uploaded file %s\n", fileName)
-	log.Println("File Upload: uploaded file ", fileName)
+	Log.Println("File Upload: uploaded file ", fileName)
 	fmt.Fprintf(w, "ok")
 }

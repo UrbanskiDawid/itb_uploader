@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -16,7 +15,7 @@ var viewNumData viewNumberData
 func ViewNumber(w http.ResponseWriter, r *http.Request) {
 	num := viewNumData.num
 
-	log.Println("ViewNumber ", num)
+	Log.Println("ViewNumber ", num)
 
 	if num < 5 {
 		viewNumData.num++
