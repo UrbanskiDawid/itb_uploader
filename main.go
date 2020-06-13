@@ -23,6 +23,7 @@ func startServer() {
 	http.HandleFunc("/action/voice", ViewVoice)
 	http.HandleFunc("/action/desk/up", ViewDeskUp)
 	http.HandleFunc("/action/desk/down", ViewDeskDown)
+	http.HandleFunc("/upload", ViewUploadFile)
 
 	fmt.Println("starting server")
 	http.ListenAndServe(fmt.Sprintf(":%d", cPort), nil)

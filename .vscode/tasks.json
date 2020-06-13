@@ -14,11 +14,24 @@
             }
         },
         {
-            "taskName": "Open webview",     
+            "taskName": "open webview",     
             "command": "/usr/bin/google-chrome",
             "args": [
                 "http://localhost:8080/"
-            ]
+            ],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
+        },
+        {
+            "taskName": "upload file",     
+            "command": "curl",
+            "args": [
+                "-F",
+                "file=@config.json",
+                "localhost:8080/upload"
+            ],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
         },
     ]
 }
