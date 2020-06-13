@@ -34,7 +34,7 @@ func ViewDate(w http.ResponseWriter, r *http.Request) {
 		defer dateCmd.lock.Unlock()
 
 		fmt.Println("ViewDate cmd: ", actionName, "begin")
-		ret, err := executeAction(actionName)
+		ret, _, err := executeAction(actionName)
 		if err == nil {
 			dateCmd.out = ret
 		}

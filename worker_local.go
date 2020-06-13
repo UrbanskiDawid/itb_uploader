@@ -7,11 +7,12 @@ import (
 	"strings"
 )
 
-func executeLocal(cmd string) (string, error) {
+func executeLocal(cmd string) (string, string, error) {
 
 	log.Println("executeLocal", cmd)
 
 	var out bytes.Buffer
+	var outErr bytes.Buffer
 
 	s := strings.Split(cmd, " ")
 
@@ -21,17 +22,19 @@ func executeLocal(cmd string) (string, error) {
 	exe := exec.Command(app, args...)
 	exe.Stdin = strings.NewReader("")
 	exe.Stdout = &out
+	exe.Stderr = &outErr
 
 	err := exe.Start()
 	if err != nil {
-		log.Fatal(err)
-		return "", err
+		log.Println("executeLocal failed to start", err)
+		return "", "", err
 	}
 
 	err = exe.Wait()
 	if err != nil {
-		return "", err
+		print(outErr.String())
 	}
 
-	return out.String(), err
+	log.Printf("executeLocal failed at wait %s\n", err)
+	return out.String(), outErr.String(), err
 }

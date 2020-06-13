@@ -2,7 +2,7 @@ package main
 
 import "strings"
 
-func executeAction(actionName string) (string, error) {
+func executeAction(actionName string) (string,string, error) {
 
 	action := getActionByName(actionName)
 

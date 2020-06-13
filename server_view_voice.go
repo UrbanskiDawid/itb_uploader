@@ -24,13 +24,13 @@ func ViewVoice(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer voiceCmd.lock.Unlock()
 		println("voice begin")
-		ret, err := executeAction(actionName)
+		ret, retErr, err := executeAction(actionName)
 		voiceCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret
-			println("voice end: OK")
+			println("voice end: OK", ret, retErr)
 		} else {
-			println("voice end: FAIL", err)
+			println("voice end: FAIL", retErr, err)
 		}
 	}()
 

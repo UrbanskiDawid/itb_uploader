@@ -24,7 +24,7 @@ func deskRunAction(actionName string) {
 
 		logMsg := fmt.Sprintf("cmd: %s", actionName)
 		println(logMsg, "start")
-		ret, err := executeAction(actionName)
+		ret, _, err := executeAction(actionName)
 		deskCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret

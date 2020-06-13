@@ -58,33 +58,36 @@ func configureSSHforServer(serverName string) (*ssh.Client, error) {
 	return ssh.Dial("tcp", host, sshConfig)
 }
 
-func executeSSH(cmd string, serverName string) (string, error) {
+func executeSSH(cmd string, serverName string) (string, string, error) {
 
 	log.Println("executeSSH", cmd, serverName)
 
 	client, err := configureSSHforServer(serverName)
 	if err != nil {
 		log.Print("executeSSH configureSSHforServer fail")
-		return "", err
+		return "", "", err
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
 		log.Print("executeSSH NewSession fail")
-		return "", err
+		return "", "", err
 	}
 	defer client.Close()
 
 	var out bytes.Buffer
+	var outErr bytes.Buffer
 	session.Stdin = strings.NewReader("")
 	session.Stdout = &out
+	session.Stderr = &outErr
+
 	err = session.Start(cmd)
 	if err != nil {
 		log.Print("executeSSH start fail")
-		return "", err
+		return out.String(), outErr.String(), err
 	}
 	defer session.Close()
 	session.Wait()
 
-	return out.String(), err
+	return out.String(), outErr.String(), err
 }
