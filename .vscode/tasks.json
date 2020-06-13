@@ -14,7 +14,7 @@
             }
         },
         {
-            "taskName": "open webview",     
+            "label": "open webview",     
             "command": "/usr/bin/google-chrome",
             "args": [
                 "http://localhost:8080/"
@@ -23,7 +23,7 @@
             "problemMatcher": []
         },
         {
-            "taskName": "upload file",     
+            "label": "Request: upload file",     
             "command": "curl",
             "args": [
                 "-F",
@@ -33,12 +33,20 @@
             "presentation": { "reveal": "never" },
             "problemMatcher": []
         },
-
         {
-            "taskName": "request voice",     
+            "label": "Request: voice",     
             "command": "curl",
             "args": [
                 "localhost:8080/action/voice"
+            ],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Request: date",     
+            "command": "curl",
+            "args": [
+                "localhost:8080/action/date"
             ],
             "presentation": { "reveal": "never" },
             "problemMatcher": []
