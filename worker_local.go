@@ -11,7 +11,12 @@ func executeLocal(cmd string) (string, error) {
 
 	var out bytes.Buffer
 
-	exe := exec.Command(cmd)
+	s := strings.Split(cmd, " ")
+
+	app := s[0]
+	args := s[1:]
+
+	exe := exec.Command(app, args...)
 	exe.Stdin = strings.NewReader("")
 	exe.Stdout = &out
 
@@ -23,7 +28,6 @@ func executeLocal(cmd string) (string, error) {
 
 	err = exe.Wait()
 	if err != nil {
-		log.Fatal(err)
 		return "", err
 	}
 
