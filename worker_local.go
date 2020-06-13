@@ -9,6 +9,8 @@ import (
 
 func executeLocal(cmd string) (string, error) {
 
+	log.Println("executeLocal", cmd)
+
 	var out bytes.Buffer
 
 	s := strings.Split(cmd, " ")

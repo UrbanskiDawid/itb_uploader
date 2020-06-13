@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -16,6 +17,8 @@ var dateCmd viewPackageMemory
 
 //ViewDate get date from remote
 func ViewDate(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("ViewDate")
 
 	actionName := "date"
 	w.Header().Set("refresh", "2;url=/")

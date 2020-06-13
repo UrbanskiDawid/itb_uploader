@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"sync"
 )
@@ -15,6 +16,7 @@ var voiceCmd viewVoiceMemory
 
 //ViewVoice play voice via SSH
 func ViewVoice(w http.ResponseWriter, r *http.Request) {
+	log.Println("ViewVoice")
 	actionName := "voice"
 
 	voiceCmd.lock.Lock()

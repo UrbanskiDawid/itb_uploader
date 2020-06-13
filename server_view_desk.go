@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -36,6 +37,7 @@ func deskRunAction(actionName string) {
 
 //ViewDeskUp move desk up
 func ViewDeskUp(w http.ResponseWriter, r *http.Request) {
+	log.Println("ViewDeskUp")
 	w.Header().Set("refresh", "3;url=/")
 	if deskCmd.running {
 		fmt.Fprint(w, "busy")
@@ -47,6 +49,7 @@ func ViewDeskUp(w http.ResponseWriter, r *http.Request) {
 
 //ViewDeskDown move desk down
 func ViewDeskDown(w http.ResponseWriter, r *http.Request) {
+	log.Println("ViewDeskDown")
 	w.Header().Set("refresh", "3;url=/")
 
 	if deskCmd.running {

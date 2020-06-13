@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -19,6 +20,9 @@ var htmlIndex string = `<html>
 
 // ViewIndex main page
 func ViewIndex(w http.ResponseWriter, r *http.Request) {
+
+	log.Println("ViewIndex")
+
 	fmt.Fprint(w, htmlIndex)
 	fmt.Fprintf(w, "<p>runNum: %d</p>", viewNumData.num)
 	fmt.Fprintf(w, "<p>runCmd: %t %s</p>", dateCmd.running, dateCmd.out)

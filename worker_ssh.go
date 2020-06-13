@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -43,6 +44,7 @@ func configureSSHforServer(serverName string) (*ssh.Client, error) {
 
 	auth, err := getAuthMethod(server.Auth.Pass)
 	if err != nil {
+		log.Println("getAuthMethod failed")
 		return nil, err
 	}
 
@@ -58,15 +60,17 @@ func configureSSHforServer(serverName string) (*ssh.Client, error) {
 
 func executeSSH(cmd string, serverName string) (string, error) {
 
+	log.Println("executeSSH", cmd, serverName)
+
 	client, err := configureSSHforServer(serverName)
 	if err != nil {
-		println("executeSSH configureSSHforServer fail")
+		log.Print("executeSSH configureSSHforServer fail")
 		return "", err
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
-		println("executeSSH NewSession fail")
+		log.Print("executeSSH NewSession fail")
 		return "", err
 	}
 	defer client.Close()
@@ -76,7 +80,7 @@ func executeSSH(cmd string, serverName string) (string, error) {
 	session.Stdout = &out
 	err = session.Start(cmd)
 	if err != nil {
-		println("executeSSH start fail")
+		log.Print("executeSSH start fail")
 		return "", err
 	}
 	defer session.Close()
