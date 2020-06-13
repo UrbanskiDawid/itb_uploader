@@ -1,4 +1,4 @@
-package main
+package logging
 
 import (
 	"flag"
@@ -10,7 +10,7 @@ var (
 	Log *log.Logger
 )
 
-func initLogger() {
+func InitLogger() {
 	// set location of log file
 	var logpath = "info.log"
 

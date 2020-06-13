@@ -1,4 +1,4 @@
-package main
+package views
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 var tempFolder string = "TEMP"
@@ -53,17 +54,17 @@ func saveFile(r *http.Request) (string, error) {
 
 //ViewUploadFile save file
 func ViewUploadFile(w http.ResponseWriter, r *http.Request) {
-	Log.Println("ViewUploadFile")
+	logging.Log.Println("ViewUploadFile")
 	fileName, err := saveFile(r)
 	if err != nil {
 		fmt.Fprint(w, "error")
 		fmt.Println("File Upload: error", err)
-		Log.Println("File Upload: error ", err)
+		logging.Log.Println("File Upload: error ", err)
 		return
 	}
 
 	// return that we have successfully uploaded our file!
 	fmt.Printf("File Upload: uploaded file %s\n", fileName)
-	Log.Println("File Upload: uploaded file ", fileName)
+	logging.Log.Println("File Upload: uploaded file ", fileName)
 	fmt.Fprintf(w, "ok")
 }

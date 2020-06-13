@@ -1,10 +1,11 @@
-package main
+package views
 
 import (
 	"fmt"
 	"net/http"
 	"sync"
 	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 type viewDeskMemory struct {
@@ -23,21 +24,21 @@ func deskRunAction(actionName string) {
 		defer deskCmd.lock.Unlock()
 
 		logMsg := fmt.Sprintf("cmd: %s", actionName)
-		println(logMsg, "start")
+		logging.Log.Println(logMsg, "start")
 		ret, _, err := workers.ExecuteAction(actionName)
 		deskCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret
-			println(logMsg, " OK ")
+			logging.Log.Println(logMsg, " OK ")
 		} else {
-			println(logMsg, " FAIL ", err)
+			logging.Log.Println(logMsg, " FAIL ", err)
 		}
 	}()
 }
 
 //ViewDeskUp move desk up
 func ViewDeskUp(w http.ResponseWriter, r *http.Request) {
-	Log.Println("ViewDeskUp")
+	logging.Log.Println("ViewDeskUp")
 	w.Header().Set("refresh", "3;url=/")
 	if deskCmd.running {
 		fmt.Fprint(w, "busy")
@@ -49,7 +50,7 @@ func ViewDeskUp(w http.ResponseWriter, r *http.Request) {
 
 //ViewDeskDown move desk down
 func ViewDeskDown(w http.ResponseWriter, r *http.Request) {
-	Log.Println("ViewDeskDown")
+	logging.Log.Println("ViewDeskDown")
 	w.Header().Set("refresh", "3;url=/")
 
 	if deskCmd.running {

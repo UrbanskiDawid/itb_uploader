@@ -1,8 +1,9 @@
-package main
+package views
 
 import (
 	"fmt"
 	"net/http"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 var htmlIndex string = `<html>
@@ -20,7 +21,7 @@ var htmlIndex string = `<html>
 // ViewIndex main page
 func ViewIndex(w http.ResponseWriter, r *http.Request) {
 
-	Log.Println("ViewIndex")
+	logging.Log.Println("ViewIndex")
 
 	fmt.Fprint(w, htmlIndex)
 	fmt.Fprintf(w, "<p>runNum: %d</p>", viewNumData.num)

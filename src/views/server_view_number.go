@@ -1,8 +1,9 @@
-package main
+package views
 
 import (
 	"fmt"
 	"net/http"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 type viewNumberData struct {
@@ -15,7 +16,7 @@ var viewNumData viewNumberData
 func ViewNumber(w http.ResponseWriter, r *http.Request) {
 	num := viewNumData.num
 
-	Log.Println("ViewNumber ", num)
+	logging.Log.Println("ViewNumber ", num)
 
 	if num < 5 {
 		viewNumData.num++

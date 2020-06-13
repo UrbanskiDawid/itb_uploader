@@ -1,10 +1,11 @@
-package main
+package views
 
 import (
 	"fmt"
 	"net/http"
 	"sync"
 	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 type viewPackageMemory struct {
@@ -18,7 +19,7 @@ var dateCmd viewPackageMemory
 //ViewDate get date from remote
 func ViewDate(w http.ResponseWriter, r *http.Request) {
 
-	Log.Println("ViewDate")
+	logging.Log.Println("ViewDate")
 
 	actionName := "date"
 	w.Header().Set("refresh", "2;url=/")

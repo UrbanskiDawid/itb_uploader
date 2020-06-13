@@ -9,6 +9,8 @@ import (
 	"os"
 	"errors"
 	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	views "github.com/UrbanskiDawid/itb_uploader/views"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 var cPort int = 8080
@@ -67,20 +69,21 @@ func serverInit() {
 
 func startServer() {
 
-	http.HandleFunc("/", ViewIndex)
-	http.HandleFunc("/get", ViewNumber)
-	http.HandleFunc("/action/date", ViewDate)
-	http.HandleFunc("/action/voice", ViewVoice)
-	http.HandleFunc("/action/desk/up", ViewDeskUp)
-	http.HandleFunc("/action/desk/down", ViewDeskDown)
-	http.HandleFunc("/upload", ViewUploadFile)
+	http.HandleFunc("/",                views.ViewIndex)
+	http.HandleFunc("/get",             views.ViewNumber)
+	http.HandleFunc("/action/date",     views.ViewDate)
+	http.HandleFunc("/action/voice",    views.ViewVoice)
+	http.HandleFunc("/action/desk/up",  views.ViewDeskUp)
+	http.HandleFunc("/action/desk/down",views.ViewDeskDown)
+	http.HandleFunc("/upload",          views.ViewUploadFile)
 
 	fmt.Println("starting server")
+	logging.Log.Println("starting server")
 	http.ListenAndServe(fmt.Sprintf(":%d", cPort), nil)
 }
 
 func main() {
-	initLogger()
+	logging.InitLogger()
 	serverInit()
 	startServer()
 }
