@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	workers "github.com/UrbanskiDawid/itb_uploader/workers"
 )
 
 type viewPackageMemory struct {
@@ -33,7 +34,7 @@ func ViewDate(w http.ResponseWriter, r *http.Request) {
 		defer dateCmd.lock.Unlock()
 
 		fmt.Println("ViewDate cmd: ", actionName, "begin")
-		ret, _, err := executeAction(actionName)
+		ret, _, err := workers.ExecuteAction(actionName)
 		if err == nil {
 			dateCmd.out = ret
 		}

@@ -31,10 +31,10 @@ jobs:
         fi
 
     - name: BuildLinux
-      run: go build -o itb_uploader.linux -v .
+      run: cd src && go build -o ../itb_uploader.linux -v .
 
     - name: BuildWindows
-      run: (GOOS=windows GOARCH=386 go build -o itb_uploader.exe -v .) 
+      run: cd src && (GOOS=windows GOARCH=386 go build -o ../itb_uploader.exe -v .) 
     
     - name: Test
       run: go test -v .

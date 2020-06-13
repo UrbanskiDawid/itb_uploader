@@ -1,4 +1,4 @@
-package main
+package workers
 
 import (
 	"encoding/json"
@@ -6,25 +6,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/user"
-	"path"
 	"strings"
 )
-
-var configurationServers map[string]Server
-var configurationActions map[string]Action
-
-//MyConfiguration entire configuration
-type MyConfiguration struct {
-	Servers []Server `json:"servers"`
-	Actions []Action `json:"actions"`
-}
-
 //Action that can be done on server
 type Action struct {
 	Name   string `json:"name"`
 	Cmd    string `json:"cmd"`
 	Server string `json:"server"`
+}
+
+var configurationActions map[string]Action
+var configurationServers map[string]Server
+
+//MyConfiguration entire configuration
+type MyConfiguration struct {
+	Servers []Server `json:"servers"`
+	Actions []Action `json:"actions"`
 }
 
 //Server definition of remote machine
@@ -71,7 +68,7 @@ func printServer(id int, server *Server) {
 	fmt.Println("Server port: ", server.Port)
 }
 
-func loadConfiguration(cfgFileName string) error {
+func LoadConfiguration(cfgFileName string) error {
 
 	//load MyConfiguration from file
 	jsonFile, err := os.Open(cfgFileName)
@@ -130,33 +127,8 @@ func getServerByNickName(nickName string) Server {
 	return configurationServers[nickName]
 }
 
+
 func getActionByName(name string) Action {
 	name = strings.ToUpper(name)
 	return configurationActions[name]
-}
-
-func FindConfigFileName() (string, error) {
-
-	//user home directory
-	usr, err := user.Current()
-	if err == nil {
-		fn := path.Join(usr.HomeDir, "itb_uploader.json")
-		if fileExists(fn) {
-			fmt.Println("configuration file found in: ", fn)
-			return fn, nil
-		} else {
-			fmt.Println("configuration file not found in: ", fn)
-		}
-	}
-
-	//curtent directory
-	wd, _ := os.Getwd()
-	fn := path.Join(wd, "config.json")
-	if fileExists(fn) {
-		fmt.Println("configuration file found in: ", fn)
-		return fn, nil
-	}
-	fmt.Println("configuration file not found in: ", fn)
-
-	return "", errors.New("no configuration file found")
 }

@@ -1,14 +1,15 @@
-package main
+package workers
 
 import (
 	"bytes"
+	"log"
 	"os/exec"
 	"strings"
 )
 
 func executeLocal(cmd string) (string, string, error) {
 
-	Log.Println("executeLocal", cmd)
+	log.Println("executeLocal", cmd)
 
 	var out bytes.Buffer
 	var outErr bytes.Buffer
@@ -25,7 +26,7 @@ func executeLocal(cmd string) (string, string, error) {
 
 	err := exe.Start()
 	if err != nil {
-		Log.Println("executeLocal failed to start", err)
+		log.Println("executeLocal failed to start", err)
 		return "", "", err
 	}
 
@@ -34,6 +35,6 @@ func executeLocal(cmd string) (string, string, error) {
 		print(outErr.String())
 	}
 
-	Log.Printf("executeLocal failed at wait %s\n", err)
+	log.Printf("executeLocal failed at wait %s\n", err)
 	return out.String(), outErr.String(), err
 }

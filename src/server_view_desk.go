@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	workers "github.com/UrbanskiDawid/itb_uploader/workers"
 )
 
 type viewDeskMemory struct {
@@ -23,7 +24,7 @@ func deskRunAction(actionName string) {
 
 		logMsg := fmt.Sprintf("cmd: %s", actionName)
 		println(logMsg, "start")
-		ret, _, err := executeAction(actionName)
+		ret, _, err := workers.ExecuteAction(actionName)
 		deskCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret

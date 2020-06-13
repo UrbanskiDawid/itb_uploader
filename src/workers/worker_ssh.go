@@ -1,4 +1,4 @@
-package main
+package workers
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"log"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -43,7 +44,7 @@ func configureSSHforServer(serverName string) (*ssh.Client, error) {
 
 	auth, err := getAuthMethod(server.Auth.Pass)
 	if err != nil {
-		Log.Println("getAuthMethod failed")
+		log.Println("getAuthMethod failed")
 		return nil, err
 	}
 
@@ -59,17 +60,17 @@ func configureSSHforServer(serverName string) (*ssh.Client, error) {
 
 func executeSSH(cmd string, serverName string) (string, string, error) {
 
-	Log.Println("executeSSH", serverName, "cmd", cmd)
+	log.Println("executeSSH", serverName, "cmd", cmd)
 
 	client, err := configureSSHforServer(serverName)
 	if err != nil {
-		Log.Print("executeSSH configureSSHforServer fail")
+		log.Print("executeSSH configureSSHforServer fail")
 		return "", "", err
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
-		Log.Print("executeSSH NewSession fail")
+		log.Print("executeSSH NewSession fail")
 		return "", "", err
 	}
 	defer client.Close()
@@ -82,7 +83,7 @@ func executeSSH(cmd string, serverName string) (string, string, error) {
 
 	err = session.Start(cmd)
 	if err != nil {
-		Log.Print("executeSSH start fail")
+		log.Print("executeSSH start fail")
 		return out.String(), outErr.String(), err
 	}
 	defer session.Close()

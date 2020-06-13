@@ -7,7 +7,7 @@
             
             "label": "run",
             "type": "shell",
-            "command": "go run *.go",
+            "command": "cd src && go run .",
             "group": {
                 "kind": "build",
                 "isDefault": true
