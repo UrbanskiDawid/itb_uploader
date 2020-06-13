@@ -73,6 +73,7 @@ func startServer() {
 	http.HandleFunc("/get",             views.ViewNumber)
 	http.HandleFunc("/upload",          views.ViewUploadFile)
 
+	http.HandleFunc("/action/",         views.ViewAllActions)
 	http.HandleFunc("/action/date",     views.ViewDate)
 	http.HandleFunc("/action/voice",    views.ViewVoice)
 	http.HandleFunc("/action/desk/up",  views.ViewDeskUp)

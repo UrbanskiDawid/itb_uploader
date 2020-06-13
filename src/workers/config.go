@@ -133,3 +133,11 @@ func getActionByName(name string) Action {
 	name = strings.ToUpper(name)
 	return configurationActions[name]
 }
+
+func GetActionNames() []string{
+    names := make([]string, 0, len(configurationActions))
+    for k := range configurationActions {
+        names = append(names, k)
+    }
+	return names
+}
