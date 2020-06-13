@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 	"sync"
-	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	workers "dawidurbanski.pl/itb_uploader/workers"
 )
 
 type viewVoiceMemory struct {

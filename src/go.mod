@@ -1,4 +1,4 @@
-module github.com/UrbanskiDawid/itb_uploader
+module dawidurbanski.pl/itb_uploader
 
 go 1.14
 
