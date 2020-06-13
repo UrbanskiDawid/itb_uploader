@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/user"
+	"path"
 	"strings"
 )
 
@@ -69,7 +71,7 @@ func printServer(id int, server *Server) {
 	fmt.Println("Server port: ", server.Port)
 }
 
-func locadConfiguration(cfgFileName string) error {
+func loadConfiguration(cfgFileName string) error {
 
 	//load MyConfiguration from file
 	jsonFile, err := os.Open(cfgFileName)
@@ -87,7 +89,7 @@ func locadConfiguration(cfgFileName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print("a")
+	fmt.Println("configuration loaded from ", cfgFileName)
 
 	//SERVERS
 	configurationServers = make(map[string]Server)
@@ -110,7 +112,7 @@ func locadConfiguration(cfgFileName string) error {
 	configurationActions = make(map[string]Action)
 
 	actionsNum := len(cfg.Actions)
-	fmt.Println("servers found: ", actionsNum)
+	fmt.Println("actions found: ", actionsNum)
 	if serversNum == 0 {
 		return errors.New("no actions found in configuration")
 	}
@@ -131,4 +133,30 @@ func getServerByNickName(nickName string) Server {
 func getActionByName(name string) Action {
 	name = strings.ToUpper(name)
 	return configurationActions[name]
+}
+
+func FindConfigFileName() (string, error) {
+
+	//user home directory
+	usr, err := user.Current()
+	if err == nil {
+		fn := path.Join(usr.HomeDir, "itb_uploader.json")
+		if fileExists(fn) {
+			fmt.Println("configuration file found in: ", fn)
+			return fn, nil
+		} else {
+			fmt.Println("configuration file not found in: ", fn)
+		}
+	}
+
+	//curtent directory
+	wd, _ := os.Getwd()
+	fn := path.Join(wd, "config.json")
+	if fileExists(fn) {
+		fmt.Println("configuration file found in: ", fn)
+		return fn, nil
+	}
+	fmt.Println("configuration file not found in: ", fn)
+
+	return "", errors.New("no configuration file found")
 }

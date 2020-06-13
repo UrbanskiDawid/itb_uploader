@@ -9,7 +9,13 @@ var cPort int = 8080
 
 func serverInit() {
 	fmt.Println("starting Init")
-	err := locadConfiguration("config.json")
+
+	configFileName, err := FindConfigFileName()
+	if err != nil {
+		panic(err)
+	}
+
+	err = loadConfiguration(configFileName)
 	if err != nil {
 		panic(err)
 	}
