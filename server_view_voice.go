@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 )
@@ -23,14 +22,16 @@ func ViewVoice(w http.ResponseWriter, r *http.Request) {
 	voiceCmd.running = true
 	go func() {
 		defer voiceCmd.lock.Unlock()
-
+		println("voice begin")
 		ret, err := executeSSH(cmd, serverName)
 		voiceCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret
+			println("voice end: OK")
+		} else {
+			println("voice end: FAIL", err)
 		}
 	}()
 
 	w.Header().Set("refresh", "1;url=/")
-	fmt.Fprint(w, "ssh running")
 }

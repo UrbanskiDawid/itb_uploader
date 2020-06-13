@@ -60,7 +60,6 @@ func executeSSH(cmd string, serverName string) (string, error) {
 
 	client, err := configureSSHforServer(serverName)
 	if err != nil {
-		client.Close()
 		return "", err
 	}
 
@@ -69,12 +68,17 @@ func executeSSH(cmd string, serverName string) (string, error) {
 		client.Close()
 		return "", err
 	}
+	defer client.Close()
 
 	var out bytes.Buffer
 	session.Stdin = strings.NewReader("")
 	session.Stdout = &out
 	err = session.Start(cmd)
+	if err != nil {
+		return "", err
+	}
+	defer session.Close()
 	session.Wait()
-	client.Close()
+
 	return out.String(), err
 }
