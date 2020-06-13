@@ -3,6 +3,7 @@ package views
 import (
 	"net/http"
 	"sync"
+	"fmt"
 	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 	workers "github.com/UrbanskiDawid/itb_uploader/workers"
 )
@@ -18,6 +19,8 @@ var voiceCmd viewVoiceMemory
 //ViewVoice play voice via SSH
 func ViewVoice(w http.ResponseWriter, r *http.Request) {
 	logging.Log.Println("ViewVoice")
+	fmt.Println("Request ViewVoice")
+
 	actionName := "voice"
 
 	voiceCmd.lock.Lock()

@@ -2,14 +2,14 @@ package workers
 
 import (
 	"bytes"
-	"log"
 	"os/exec"
 	"strings"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 func executeLocal(cmd string) (string, string, error) {
 
-	log.Println("executeLocal", cmd)
+	logging.Log.Println("executeLocal", cmd)
 
 	var out bytes.Buffer
 	var outErr bytes.Buffer
@@ -26,15 +26,14 @@ func executeLocal(cmd string) (string, string, error) {
 
 	err := exe.Start()
 	if err != nil {
-		log.Println("executeLocal failed to start", err)
+		logging.Log.Println("executeLocal failed to start", err)
 		return "", "", err
 	}
 
 	err = exe.Wait()
 	if err != nil {
-		print(outErr.String())
+		logging.Log.Printf("executeLocal failed at wait %s\n", outErr.String())
 	}
 
-	log.Printf("executeLocal failed at wait %s\n", err)
 	return out.String(), outErr.String(), err
 }

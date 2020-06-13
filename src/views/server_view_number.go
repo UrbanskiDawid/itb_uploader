@@ -17,6 +17,8 @@ func ViewNumber(w http.ResponseWriter, r *http.Request) {
 	num := viewNumData.num
 
 	logging.Log.Println("ViewNumber ", num)
+	fmt.Println("Request ViewNumber")
+	
 
 	if num < 5 {
 		viewNumData.num++

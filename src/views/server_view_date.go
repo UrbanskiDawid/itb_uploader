@@ -20,6 +20,7 @@ var dateCmd viewPackageMemory
 func ViewDate(w http.ResponseWriter, r *http.Request) {
 
 	logging.Log.Println("ViewDate")
+	fmt.Println("Request ViewDate")
 
 	actionName := "date"
 	w.Header().Set("refresh", "2;url=/")
@@ -34,13 +35,13 @@ func ViewDate(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer dateCmd.lock.Unlock()
 
-		fmt.Println("ViewDate cmd: ", actionName, "begin")
+		logging.Log.Println("ViewDate cmd: ", actionName, "begin")
 		ret, _, err := workers.ExecuteAction(actionName)
 		if err == nil {
 			dateCmd.out = ret
 		}
 		dateCmd.running = false
-		fmt.Println("ViewDate cmd: ", actionName, "end")
+		logging.Log.Println("ViewDate cmd: ", actionName, "end")
 	}()
 
 	fmt.Fprint(w, "running")

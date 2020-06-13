@@ -55,6 +55,8 @@ func saveFile(r *http.Request) (string, error) {
 //ViewUploadFile save file
 func ViewUploadFile(w http.ResponseWriter, r *http.Request) {
 	logging.Log.Println("ViewUploadFile")
+	fmt.Println("Request ViewUploadFile")
+	
 	fileName, err := saveFile(r)
 	if err != nil {
 		fmt.Fprint(w, "error")

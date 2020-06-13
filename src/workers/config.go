@@ -3,10 +3,11 @@ package workers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 //Action that can be done on server
 type Action struct {
@@ -38,9 +39,9 @@ type credentials struct {
 }
 
 func printAction(id int, action *Action) {
-	fmt.Println("Action #", id)
-	fmt.Println("Action name: ", action.Name)
-	fmt.Println("Action server: ", action.Server)
+	logging.Log.Println("Action #", id)
+	logging.Log.Println("Action name: ", action.Name)
+	logging.Log.Println("Action server: ", action.Server)
 }
 
 func loadEnv() credentials {
@@ -60,12 +61,12 @@ func overrideServerAuth(auth *credentials, overrideAuth *credentials) {
 }
 
 func printServer(id int, server *Server) {
-	fmt.Println("Server #", id)
-	fmt.Println("Server Nick: ", server.NickName)
-	fmt.Println("Server Host: ", server.Host)
-	fmt.Println("Server User: ", server.Auth.User)
-	fmt.Println("Server Pass: ", server.Auth.Pass)
-	fmt.Println("Server port: ", server.Port)
+	logging.Log.Println("Server #", id)
+	logging.Log.Println("Server Nick: ", server.NickName)
+	logging.Log.Println("Server Host: ", server.Host)
+	logging.Log.Println("Server User: ", server.Auth.User)
+	logging.Log.Println("Server Pass: ", server.Auth.Pass)
+	logging.Log.Println("Server port: ", server.Port)
 }
 
 func LoadConfiguration(cfgFileName string) error {
@@ -86,13 +87,13 @@ func LoadConfiguration(cfgFileName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("configuration loaded from ", cfgFileName)
+	logging.Log.Println("configuration loaded from ", cfgFileName)
 
 	//SERVERS
 	configurationServers = make(map[string]Server)
 
 	serversNum := len(cfg.Servers)
-	fmt.Println("servers found: ", serversNum)
+	logging.Log.Println("servers found: ", serversNum)
 	if serversNum == 0 {
 		return errors.New("no servers found in configuration")
 	}
@@ -109,7 +110,7 @@ func LoadConfiguration(cfgFileName string) error {
 	configurationActions = make(map[string]Action)
 
 	actionsNum := len(cfg.Actions)
-	fmt.Println("actions found: ", actionsNum)
+	logging.Log.Println("actions found: ", actionsNum)
 	if serversNum == 0 {
 		return errors.New("no actions found in configuration")
 	}

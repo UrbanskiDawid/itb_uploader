@@ -22,7 +22,8 @@ var htmlIndex string = `<html>
 func ViewIndex(w http.ResponseWriter, r *http.Request) {
 
 	logging.Log.Println("ViewIndex")
-
+	fmt.Println("Request ViewIndex")
+	
 	fmt.Fprint(w, htmlIndex)
 	fmt.Fprintf(w, "<p>runNum: %d</p>", viewNumData.num)
 	fmt.Fprintf(w, "<p>runCmd: %t %s</p>", dateCmd.running, dateCmd.out)
