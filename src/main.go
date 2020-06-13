@@ -71,12 +71,13 @@ func startServer() {
 
 	http.HandleFunc("/",                views.ViewIndex)
 	http.HandleFunc("/get",             views.ViewNumber)
+	http.HandleFunc("/upload",          views.ViewUploadFile)
+
 	http.HandleFunc("/action/date",     views.ViewDate)
 	http.HandleFunc("/action/voice",    views.ViewVoice)
 	http.HandleFunc("/action/desk/up",  views.ViewDeskUp)
 	http.HandleFunc("/action/desk/down",views.ViewDeskDown)
-	http.HandleFunc("/upload",          views.ViewUploadFile)
-
+	
 	fmt.Println("starting server")
 	logging.Log.Println("starting server")
 	http.ListenAndServe(fmt.Sprintf(":%d", cPort), nil)
