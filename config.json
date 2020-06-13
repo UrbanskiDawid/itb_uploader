@@ -1,0 +1,16 @@
+{
+    "servers": [
+      {
+        "nickname": "mini",
+        "host": "192.168.1.111",
+        "auth":{ "user": "userA", "pass": "passA"},
+        "port": 22
+      },
+      {
+        "nickname": "zero",
+        "host": "192.168.1.106",
+        "auth":{ "user": "userB", "pass": "passB"},
+        "port": 22
+      }
+    ]
+  } 

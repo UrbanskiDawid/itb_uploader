@@ -3,32 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
-
-type SSHconfig struct {
-	user string
-	pass string
-	host string
-	port int
-}
-
-func loadConfig() SSHconfig {
-
-	var ret SSHconfig
-	ret.user = os.Getenv("SSH_USER")
-	ret.pass = os.Getenv("SSH_PASS")
-	ret.host = fmt.Sprintf("%s:%s", os.Getenv("SSH_HOST"), os.Getenv("SSH_PORT"))
-
-	if ret.user == "" || ret.pass == "" || ret.host == "" {
-		panic("enviroment configuration missing")
-	}
-
-	return ret
-}
 
 func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
 
@@ -52,11 +30,11 @@ func connectToHost(user, pass, host string) (*ssh.Client, *ssh.Session, error) {
 	return client, session, nil
 }
 
-func Remote(cmd string) (string, error) {
+func executeSSH(cmd string, serverName string) (string, error) {
 
-	config := loadConfig()
+	server := getServerByNickName(serverName)
 
-	client, session, err := connectToHost(config.user, config.pass, config.host)
+	client, session, err := connectToHost(server.Auth.User, server.Auth.Pass, fmt.Sprintf("%s:%d", server.Host, server.Port))
 	if err != nil {
 		panic(err)
 	}
