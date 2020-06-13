@@ -3,28 +3,40 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 )
 
 var cPort int = 8080
 
 func serverInit() {
-	jsonFile, err := os.Open("config.json")
-	// if we os.Open returns an error then handle it
+	fmt.Println("starting Init")
+	err := locadConfiguration("config.json")
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
-	locadConfiguration(jsonFile)
 }
+
+var htmlIndex string = `
+<html>
+<ul>
+<li><a href="/get">get</a></li>
+<li><a href="/action/date">date</a></li>
+<li><a href="/action/voice">voice</a></li>
+</ul>
+<p>
+<a href="/action/desk/up"><button>desk up</button></a>
+<a href="/action/desk/down"><button>desk donw</button></a>
+</p>
+</html>
+`
 
 func startServer() {
 
 	http.HandleFunc("/", ViewIndex)
 	http.HandleFunc("/get", ViewNumber)
-	http.HandleFunc("/run", ViewDate)
-	http.HandleFunc("/ssh", ViewVoice)
-	http.HandleFunc("/desk/up", ViewDeskUp)
-	http.HandleFunc("/desk/down", ViewDeskDown)
+	http.HandleFunc("/action/date", ViewDate)
+	http.HandleFunc("/action/voice", ViewVoice)
+	http.HandleFunc("/action/desk/up", ViewDeskUp)
+	http.HandleFunc("/action/desk/down", ViewDeskDown)
 
 	fmt.Println("starting server")
 	http.ListenAndServe(fmt.Sprintf(":%d", cPort), nil)

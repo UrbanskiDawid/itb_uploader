@@ -6,20 +6,6 @@ import (
 	"sync"
 )
 
-var html string = `
-<html>
-<ul>
-<li><a href="/get">get</a></li>
-<li><a href="/run">run</a></li>
-<li><a href="/ssh">ssh</a></li>
-<li><a href="/desk/up">upa</a></li>
-<li><a href="/desk/down">down</a></li>
-</ul>
-</html>
-`
-
-var servers Servers
-
 type serverStatus struct {
 	text string
 	num  int
@@ -29,7 +15,7 @@ var status serverStatus
 
 // ViewIndex main page
 func ViewIndex(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, html)
+	fmt.Fprint(w, htmlIndex)
 	fmt.Fprintf(w, "<p>status: %s</p>", status.text)
 	fmt.Fprintf(w, "<p>num: %d</p>", status.num)
 	fmt.Fprintf(w, "<p>runCmd: %t %s</p>", dateCmd.running, dateCmd.out)
@@ -89,47 +75,53 @@ var dateCmd localCmd
 
 //ViewDate get date from remote
 func ViewDate(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("refresh", "2;url=/")
+
 	if dateCmd.running {
 		fmt.Fprint(w, "busy")
 		return
 	}
+
+	action := getActionByName("date")
+
 	dateCmd.lock.Lock()
 	dateCmd.running = true
 	go func() {
 		defer dateCmd.lock.Unlock()
 
-		ret, err := executeLocal("date")
+		fmt.Println("ViewDate cmd: ", action.Cmd, "begin")
+		ret, err := executeLocal(action.Cmd)
 		if err == nil {
 			dateCmd.out = ret
 		}
 		dateCmd.running = false
+		fmt.Println("ViewDate cmd: ", action.Cmd, "end")
 	}()
 
-	w.Header().Set("refresh", "2;url=/")
-	fmt.Println("run begin")
 	fmt.Fprint(w, "running")
 }
 
 var deskCmd remoteCmd
 
-func deskRun(height int) {
-	cmd := fmt.Sprintf("sudo /home/dawid/example-moveTo %d", height)
-	serverName := "ZERO"
+func deskRun(actionName string) {
+
+	action := getActionByName(actionName)
+
+	logMsg := fmt.Sprintf("cmd: %s %s", action.Server, action.Cmd)
 
 	deskCmd.lock.Lock()
 	deskCmd.running = true
 	go func() {
 		defer deskCmd.lock.Unlock()
-		println("cmd:", cmd, serverName)
-		ret, err := executeSSH(cmd, serverName)
-
-		println("cmd:", cmd, serverName, " end ")
+		println(logMsg, "start")
+		ret, err := executeSSH(action.Cmd, action.Server)
 		deskCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret
-			println("cmd:", cmd, " OK ")
+			println(logMsg, " OK ")
 		} else {
-			println("cmd:", cmd, " FAIL ", err)
+			println(logMsg, " FAIL ", err)
 		}
 	}()
 }
@@ -140,7 +132,7 @@ func ViewDeskUp(w http.ResponseWriter, r *http.Request) {
 	if deskCmd.running {
 		fmt.Fprint(w, "busy")
 	} else {
-		deskRun(6000)
+		deskRun("desk up")
 		fmt.Fprint(w, "going up")
 	}
 }
@@ -152,7 +144,7 @@ func ViewDeskDown(w http.ResponseWriter, r *http.Request) {
 	if deskCmd.running {
 		fmt.Fprint(w, "busy")
 	} else {
-		deskRun(4000)
+		deskRun("desk down")
 		fmt.Fprint(w, "going down")
 	}
 }

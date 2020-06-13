@@ -2,21 +2,30 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"strings"
 )
 
-// Users struct which contains
-// an array of users
-type Servers struct {
-	Server []Server `json:"servers"`
+var configurationServers map[string]Server
+var configurationActions map[string]Action
+
+//MyConfiguration entire configuration
+type MyConfiguration struct {
+	Servers []Server `json:"servers"`
+	Actions []Action `json:"actions"`
 }
 
-// User struct which contains a name
-// a type and a list of social links
+//Action that can be done on server
+type Action struct {
+	Name   string `json:"name"`
+	Cmd    string `json:"cmd"`
+	Server string `json:"server"`
+}
+
+//Server definition of remote machine
 type Server struct {
 	NickName string      `json:"nickname"`
 	Host     string      `json:"host"`
@@ -29,14 +38,18 @@ type credentials struct {
 	Pass string `json:"pass"`
 }
 
+func printAction(id int, action *Action) {
+	fmt.Println("Action #", id)
+	fmt.Println("Action name: ", action.Name)
+	fmt.Println("Action server: ", action.Server)
+}
+
 func loadEnv() credentials {
 	var ret credentials
 	ret.User = os.Getenv("SSH_USER")
 	ret.Pass = os.Getenv("SSH_PASS")
 	return ret
 }
-
-var configuration map[string]Server
 
 func overrideServerAuth(auth *credentials, overrideAuth *credentials) {
 	if overrideAuth.User != "" {
@@ -48,33 +61,74 @@ func overrideServerAuth(auth *credentials, overrideAuth *credentials) {
 }
 
 func printServer(id int, server *Server) {
-	fmt.Println("Server #", id, " ", server.NickName)
+	fmt.Println("Server #", id)
+	fmt.Println("Server Nick: ", server.NickName)
 	fmt.Println("Server Host: ", server.Host)
 	fmt.Println("Server User: ", server.Auth.User)
 	fmt.Println("Server Pass: ", server.Auth.Pass)
 	fmt.Println("Server port: ", server.Port)
 }
 
-func locadConfiguration(jsonFile io.Reader) {
+func locadConfiguration(cfgFileName string) error {
 
+	//load MyConfiguration from file
+	jsonFile, err := os.Open(cfgFileName)
+	if err != nil {
+		return err
+	}
+
+	var cfg MyConfiguration
+	byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(byteValue, &cfg)
+	if err != nil {
+		return err
+	}
+	fmt.Print("a")
+
+	//SERVERS
+	configurationServers = make(map[string]Server)
+
+	serversNum := len(cfg.Servers)
+	fmt.Println("servers found: ", serversNum)
+	if serversNum == 0 {
+		return errors.New("no servers found in configuration")
+	}
 	authFromEnviroment := loadEnv()
 
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var servers Servers
-	json.Unmarshal(byteValue, &servers)
-
-	configuration = make(map[string]Server)
-
-	for i := 0; i < len(servers.Server); i++ {
-		nickName := strings.ToUpper(servers.Server[i].NickName)
-		overrideServerAuth(&servers.Server[i].Auth, &authFromEnviroment)
-		configuration[nickName] = servers.Server[i]
-		printServer(i, &servers.Server[i])
+	for i := 0; i < serversNum; i++ {
+		nickName := strings.ToUpper(cfg.Servers[i].NickName)
+		overrideServerAuth(&cfg.Servers[i].Auth, &authFromEnviroment)
+		configurationServers[nickName] = cfg.Servers[i]
+		printServer(i, &cfg.Servers[i])
 	}
+
+	//ACTIONS
+	configurationActions = make(map[string]Action)
+
+	actionsNum := len(cfg.Actions)
+	fmt.Println("servers found: ", actionsNum)
+	if serversNum == 0 {
+		return errors.New("no actions found in configuration")
+	}
+	for i := 0; i < actionsNum; i++ {
+		name := strings.ToUpper(cfg.Actions[i].Name)
+		configurationActions[name] = cfg.Actions[i]
+		printAction(i, &cfg.Actions[i])
+	}
+
+	return nil
 }
 
 func getServerByNickName(nickName string) Server {
-
 	nickName = strings.ToUpper(nickName)
-	return configuration[nickName]
+	return configurationServers[nickName]
+}
+
+func getActionByName(name string) Action {
+	name = strings.ToUpper(name)
+	return configurationActions[name]
 }

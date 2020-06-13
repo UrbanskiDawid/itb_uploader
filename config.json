@@ -12,5 +12,28 @@
         "auth":{ "user": "userB", "pass": "passB"},
         "port": 22
       }
+    ],
+
+    "actions":[
+        {
+            "name": "voice",
+            "cmd": "python3 /home/dawid/cast.py ASSISTANT_VOICE/dave.mp3",
+            "server": "MINI"
+        },
+        {
+            "name": "desk up",
+            "cmd": "sudo /home/dawid/example-moveTo 6000",
+            "server": "ZERO"
+        },
+        {
+            "name": "desk down",
+            "cmd": "sudo /home/dawid/example-moveTo 4000",
+            "server": "ZERO"
+        },
+        {
+            "name": "date",
+            "cmd": "date",
+            "server": "localhost"
+        }
     ]
-  } 
+} 
