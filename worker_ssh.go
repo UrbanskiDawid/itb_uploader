@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
@@ -60,12 +61,13 @@ func executeSSH(cmd string, serverName string) (string, error) {
 
 	client, err := configureSSHforServer(serverName)
 	if err != nil {
+		log.Print("executeSSH configureSSHforServer fail")
 		return "", err
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
-		client.Close()
+		log.Print("executeSSH NewSession fail")
 		return "", err
 	}
 	defer client.Close()
@@ -75,6 +77,7 @@ func executeSSH(cmd string, serverName string) (string, error) {
 	session.Stdout = &out
 	err = session.Start(cmd)
 	if err != nil {
+		log.Print("executeSSH start fail")
 		return "", err
 	}
 	defer session.Close()
