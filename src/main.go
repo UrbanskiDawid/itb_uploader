@@ -8,7 +8,7 @@ import (
 	"path"
 	"os"
 	"errors"
-	workers "dawidurbanski.pl/itb_uploader/workers"
+	workers "github.com/UrbanskiDawid/itb_uploader/workers"
 )
 
 var cPort int = 8080

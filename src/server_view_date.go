@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	workers "dawidurbanski.pl/itb_uploader/workers"
+	workers "github.com/UrbanskiDawid/itb_uploader/workers"
 )
 
 type viewPackageMemory struct {

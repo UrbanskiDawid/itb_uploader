@@ -24,7 +24,6 @@ jobs:
 
     - name: Get dependencies
       run: |
-        go get golang.org/x/crypto/ssh
         if [ -f Gopkg.toml ]; then
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
@@ -37,7 +36,7 @@ jobs:
       run: cd src && (GOOS=windows GOARCH=386 go build -o ../itb_uploader.exe -v .) 
     
     - name: Test
-      run: go test -v .
+      run: cd src && go test -v .
 
     - name: Archive exe for linux
       uses: actions/upload-artifact@v1
