@@ -15,15 +15,14 @@ var voiceCmd viewVoiceMemory
 
 //ViewVoice play voice via SSH
 func ViewVoice(w http.ResponseWriter, r *http.Request) {
-	cmd := "python3 /home/dawid/cast.py ASSISTANT_VOICE/dave.mp3"
-	serverName := "MINI"
+	actionName := "voice"
 
 	voiceCmd.lock.Lock()
 	voiceCmd.running = true
 	go func() {
 		defer voiceCmd.lock.Unlock()
 		println("voice begin")
-		ret, err := executeSSH(cmd, serverName)
+		ret, err := executeAction(actionName)
 		voiceCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret

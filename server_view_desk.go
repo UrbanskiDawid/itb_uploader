@@ -16,16 +16,14 @@ var deskCmd viewDeskMemory
 
 func deskRunAction(actionName string) {
 
-	action := getActionByName(actionName)
-
-	logMsg := fmt.Sprintf("cmd: %s %s", action.Server, action.Cmd)
-
 	deskCmd.lock.Lock()
 	deskCmd.running = true
 	go func() {
 		defer deskCmd.lock.Unlock()
+
+		logMsg := fmt.Sprintf("cmd: %s", actionName)
 		println(logMsg, "start")
-		ret, err := executeSSH(action.Cmd, action.Server)
+		ret, err := executeAction(actionName)
 		deskCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret

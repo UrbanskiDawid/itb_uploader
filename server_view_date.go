@@ -17,6 +17,7 @@ var dateCmd viewPackageMemory
 //ViewDate get date from remote
 func ViewDate(w http.ResponseWriter, r *http.Request) {
 
+	actionName := "date"
 	w.Header().Set("refresh", "2;url=/")
 
 	if dateCmd.running {
@@ -24,20 +25,18 @@ func ViewDate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	action := getActionByName("date")
-
 	dateCmd.lock.Lock()
 	dateCmd.running = true
 	go func() {
 		defer dateCmd.lock.Unlock()
 
-		fmt.Println("ViewDate cmd: ", action.Cmd, "begin")
-		ret, err := executeLocal(action.Cmd)
+		fmt.Println("ViewDate cmd: ", actionName, "begin")
+		ret, err := executeAction(actionName)
 		if err == nil {
 			dateCmd.out = ret
 		}
 		dateCmd.running = false
-		fmt.Println("ViewDate cmd: ", action.Cmd, "end")
+		fmt.Println("ViewDate cmd: ", actionName, "end")
 	}()
 
 	fmt.Fprint(w, "running")
