@@ -15,20 +15,6 @@ func serverInit() {
 	}
 }
 
-var htmlIndex string = `
-<html>
-<ul>
-<li><a href="/get">get</a></li>
-<li><a href="/action/date">date</a></li>
-<li><a href="/action/voice">voice</a></li>
-</ul>
-<p>
-<a href="/action/desk/up"><button>desk up</button></a>
-<a href="/action/desk/down"><button>desk donw</button></a>
-</p>
-</html>
-`
-
 func startServer() {
 
 	http.HandleFunc("/", ViewIndex)
