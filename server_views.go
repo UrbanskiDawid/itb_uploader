@@ -6,28 +6,26 @@ import (
 	"sync"
 )
 
-type serverStatus struct {
-	text string
-	num  int
-}
-
-var status serverStatus
-
 // ViewIndex main page
 func ViewIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, htmlIndex)
-	fmt.Fprintf(w, "<p>status: %s</p>", status.text)
-	fmt.Fprintf(w, "<p>num: %d</p>", status.num)
+	fmt.Fprintf(w, "<p>runNum: %d</p>", viewNumData.num)
 	fmt.Fprintf(w, "<p>runCmd: %t %s</p>", dateCmd.running, dateCmd.out)
 	fmt.Fprintf(w, "<p>sshCmd: %t %s</p>", voiceCmd.running, voiceCmd.out)
 }
 
+type viewNumberData struct {
+	num int
+}
+
+var viewNumData viewNumberData
+
 // ViewNumber increase number
 func ViewNumber(w http.ResponseWriter, r *http.Request) {
-	num := status.num
-	status.num++
+	num := viewNumData.num
 
-	if num < 10 {
+	if num < 5 {
+		viewNumData.num++
 		w.Header().Set("refresh", "1")
 	} else {
 		w.Header().Set("refresh", "1;url=/")
