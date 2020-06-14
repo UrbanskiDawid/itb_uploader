@@ -10,9 +10,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 	"github.com/UrbanskiDawid/itb_uploader/views"
-	"github.com/UrbanskiDawid/itb_uploader/workers"
 	"github.com/urfave/cli" // imports as package "cli"
 )
 
@@ -26,7 +26,7 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func FindConfigFileName() (string, error) {
+func findConfigFileName() (string, error) {
 
 	//user home directory
 	usr, err := user.Current()
@@ -44,23 +44,20 @@ func FindConfigFileName() (string, error) {
 	wd, _ := os.Getwd()
 	fn := path.Join(wd, "config.json")
 	if fileExists(fn) {
-		fmt.Println("configuration file found in: ", fn)
 		return fn, nil
 	}
-	fmt.Println("configuration file not found in: ", fn)
-
 	return "", errors.New("no configuration file found")
 }
 
 func configInit() {
 	fmt.Println("config Init")
 
-	configFileName, err := FindConfigFileName()
+	configFileName, err := findConfigFileName()
 	if err != nil {
 		panic(err)
 	}
 
-	err = workers.LoadConfiguration(configFileName)
+	err = actions.LoadConfiguration(configFileName)
 	if err != nil {
 		panic(err)
 	}
@@ -111,11 +108,10 @@ func argsParse() {
 		},
 	}
 
-	actionNames := workers.GetActionNames()
+	actionNames := actions.GetActionNames()
 	for _, name := range actionNames {
 
 		var actionName string
-
 		actionName = name
 		actionName = strings.ToLower(actionName)
 		actionName = strings.ReplaceAll(actionName, " ", "_")
@@ -124,7 +120,7 @@ func argsParse() {
 			Name: actionName,
 			Action: func(c *cli.Context) error {
 				println("staring action '", actionName, "'")
-				stdOut, stdErr, err := workers.ExecuteAction(actionName)
+				stdOut, stdErr, err := actions.ExecuteAction(actionName)
 				print(stdOut)
 				print(stdErr)
 				return err

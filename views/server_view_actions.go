@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
-	"github.com/UrbanskiDawid/itb_uploader/workers"
+	"github.com/UrbanskiDawid/itb_uploader/actions"
 )
 
 // ViewAllActions show all acions
@@ -14,7 +14,7 @@ func ViewAllActions(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	
-	actionNames := workers.GetActionNames()
+	actionNames := actions.GetActionNames()
 	for _ ,name := range actionNames{
 		fmt.Fprintf(w, "Action: %s</br>", name)
 	} 

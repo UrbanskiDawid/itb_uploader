@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"github.com/UrbanskiDawid/itb_uploader/workers"
+	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
@@ -25,7 +25,7 @@ func deskRunAction(actionName string) {
 
 		logMsg := fmt.Sprintf("cmd: %s", actionName)
 		logging.Log.Println(logMsg, "start")
-		ret, _, err := workers.ExecuteAction(actionName)
+		ret, _, err := actions.ExecuteAction(actionName)
 		deskCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret

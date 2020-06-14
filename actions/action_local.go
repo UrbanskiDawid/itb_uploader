@@ -1,9 +1,10 @@
-package workers
+package actions
 
 import (
 	"bytes"
 	"os/exec"
 	"strings"
+
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 

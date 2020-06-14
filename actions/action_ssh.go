@@ -1,4 +1,4 @@
-package workers
+package actions
 
 import (
 	"bytes"
@@ -6,8 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"golang.org/x/crypto/ssh"
+
 	"github.com/UrbanskiDawid/itb_uploader/logging"
+	"golang.org/x/crypto/ssh"
 )
 
 func fileExists(filename string) bool {

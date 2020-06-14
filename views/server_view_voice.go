@@ -5,7 +5,7 @@ import (
 	"sync"
 	"fmt"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
-	"github.com/UrbanskiDawid/itb_uploader/workers"
+	"github.com/UrbanskiDawid/itb_uploader/actions"
 )
 
 type viewVoiceMemory struct {
@@ -28,7 +28,7 @@ func ViewVoice(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer voiceCmd.lock.Unlock()
 		println("voice begin")
-		ret, retErr, err := workers.ExecuteAction(actionName)
+		ret, retErr, err := actions.ExecuteAction(actionName)
 		voiceCmd.running = false
 		if err == nil {
 			voiceCmd.out = ret

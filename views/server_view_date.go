@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"github.com/UrbanskiDawid/itb_uploader/workers"
+
+	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
@@ -36,7 +37,7 @@ func ViewDate(w http.ResponseWriter, r *http.Request) {
 		defer dateCmd.lock.Unlock()
 
 		logging.Log.Println("ViewDate cmd: ", actionName, "begin")
-		ret, _, err := workers.ExecuteAction(actionName)
+		ret, _, err := actions.ExecuteAction(actionName)
 		if err == nil {
 			dateCmd.out = ret
 		}

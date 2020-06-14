@@ -1,4 +1,4 @@
-package workers
+package actions
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 //Action that can be done on server
