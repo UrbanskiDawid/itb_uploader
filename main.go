@@ -64,17 +64,34 @@ func configInit() {
 	fmt.Println("logging to: " + configFileName)
 }
 
+func generateUserVisibleActionName(name string) string {
+	var ret string
+	ret = name
+	ret = strings.ToLower(ret)
+	ret = strings.ReplaceAll(ret, " ", "_")
+	return ret
+}
+
 func startServer(port int) {
+
+	views.Init()
 
 	http.HandleFunc("/", views.ViewIndex)
 	http.HandleFunc("/get", views.ViewNumber)
 	http.HandleFunc("/upload", views.ViewUploadFile)
 
 	http.HandleFunc("/action/", views.ViewAllActions)
-	http.HandleFunc("/action/date", views.ViewDate)
-	http.HandleFunc("/action/voice", views.ViewVoice)
-	http.HandleFunc("/action/desk/up", views.ViewDeskUp)
-	http.HandleFunc("/action/desk/down", views.ViewDeskDown)
+
+	for _, name := range actions.GetActionNames() {
+
+		var actionName string
+		actionName = name // note must make a copy
+
+		var userVisibleNameName string
+		userVisibleNameName = generateUserVisibleActionName(name)
+		http.HandleFunc("/action/"+userVisibleNameName, views.BuildViewAction(userVisibleNameName, actionName))
+		println("/action/" + userVisibleNameName)
+	}
 
 	fmt.Println("starting server port", port)
 	logging.Log.Println("starting server port", port)
@@ -111,12 +128,13 @@ func argsParse() {
 	for _, name := range actionNames {
 
 		var actionName string
-		actionName = name
-		actionName = strings.ToLower(actionName)
-		actionName = strings.ReplaceAll(actionName, " ", "_")
+		actionName = name // note must make a copy
+
+		var userVisibleNameName string
+		userVisibleNameName = generateUserVisibleActionName(name)
 
 		cmd := cli.Command{
-			Name: actionName,
+			Name: userVisibleNameName,
 			Action: func(c *cli.Context) error {
 				println("staring action '", actionName, "'")
 				stdOut, stdErr, err := actions.ExecuteAction(actionName)
