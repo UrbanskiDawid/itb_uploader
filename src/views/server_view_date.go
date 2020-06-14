@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	"workers"
-	"logging"
+	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 type viewPackageMemory struct {

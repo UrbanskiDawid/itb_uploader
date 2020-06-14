@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os/exec"
 	"strings"
-	"logging"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 func executeLocal(cmd string) (string, string, error) {

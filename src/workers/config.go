@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"logging"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 //Action that can be done on server
 type Action struct {

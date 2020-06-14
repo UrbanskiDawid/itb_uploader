@@ -8,9 +8,9 @@ import (
 	"path"
 	"os"
 	"errors"
-	"workers"
-	"views"
-	"logging"
+	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	views "github.com/UrbanskiDawid/itb_uploader/views"
+	logging "github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 var cPort int = 8080
