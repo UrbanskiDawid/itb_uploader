@@ -3,7 +3,7 @@ package views
 import (
 	"fmt"
 	"net/http"
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 type viewNumberData struct {

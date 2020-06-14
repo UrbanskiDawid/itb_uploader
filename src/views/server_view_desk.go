@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
-	workers "github.com/UrbanskiDawid/itb_uploader/workers"
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/workers"
+	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 type viewDeskMemory struct {

@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 	"golang.org/x/crypto/ssh"
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 func fileExists(filename string) bool {

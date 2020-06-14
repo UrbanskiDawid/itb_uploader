@@ -6,8 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 //Action that can be done on server
 type Action struct {

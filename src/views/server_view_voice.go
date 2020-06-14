@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"sync"
 	"fmt"
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
-	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	"github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/workers"
 )
 
 type viewVoiceMemory struct {
