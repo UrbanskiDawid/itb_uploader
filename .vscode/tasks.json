@@ -5,9 +5,9 @@
     "tasks": [
         {
             
-            "label": "run",
+            "label": "go run",
             "type": "shell",
-            "command": "cd src && go run .",
+            "command": "go run .  -- server",
             "group": {
                 "kind": "build",
                 "isDefault": true

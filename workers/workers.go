@@ -14,7 +14,6 @@ func ExecuteAction(actionName string) (string, string, error) {
 	return executeSSH(action.Cmd, action.Server)
 }
 
-
 func GetActionNames() []string{
     names := make([]string, 0, len(configurationActions))
     for k := range configurationActions {

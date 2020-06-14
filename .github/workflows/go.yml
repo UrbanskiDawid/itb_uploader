@@ -23,13 +23,13 @@ jobs:
       uses: actions/checkout@v2
 
     - name: BuildLinux
-      run: cd src && go build -o ../itb_uploader.linux -v .
+      run: go build -o ../itb_uploader.linux -v .
 
     - name: BuildWindows
-      run: cd src && (GOOS=windows GOARCH=386 go build -o ../itb_uploader.exe -v .) 
+      run: (GOOS=windows GOARCH=386 go build -o ../itb_uploader.exe -v .) 
     
     - name: Test
-      run: cd src && go test -v .
+      run: go test -v .
 
     - name: Archive exe for linux
       uses: actions/upload-artifact@v1
@@ -42,3 +42,6 @@ jobs:
       with:
         name: itb_uploader_windows
         path: itb_uploader.exe
+
+    - name: Notify
+      run: curl www.dawidurbanski.pl:81/github || true
