@@ -98,6 +98,7 @@ func startServer(port int) {
 	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 
+//doc: https://github.com/urfave/cli/blob/master/docs/v1/manual.md
 func argsParse() {
 	app := cli.NewApp()
 	app.Usage = "make an explosive entrance"
