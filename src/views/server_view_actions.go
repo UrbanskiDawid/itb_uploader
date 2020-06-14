@@ -3,8 +3,8 @@ package views
 import (
 	"fmt"
 	"net/http"
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
-	workers "github.com/UrbanskiDawid/itb_uploader/workers"
+	"logging"
+	"workers"
 )
 
 // ViewAllActions show all acions

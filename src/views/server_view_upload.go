@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	logging "github.com/UrbanskiDawid/itb_uploader/logging"
+	"logging"
 )
 
 var tempFolder string = "TEMP"
