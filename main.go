@@ -13,7 +13,7 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 	"github.com/UrbanskiDawid/itb_uploader/views"
-	"github.com/urfave/cli" // imports as package "cli"
+	"github.com/urfave/cli"
 )
 
 var logger log.Logger
@@ -61,8 +61,7 @@ func configInit() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("logging to " + configFileName)
-
+	fmt.Println("logging to: " + configFileName)
 }
 
 func startServer(port int) {
