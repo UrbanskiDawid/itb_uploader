@@ -1,5 +1,9 @@
 # automation run commands on remote or local machines
 
+# WARNING
+
+WIP, do not use!
+
 all actions and machines are defined in config.json
 
 ## code quality
