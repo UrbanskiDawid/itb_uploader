@@ -10,7 +10,6 @@ import (
 var htmlIndex string = `<html>
 <h1>main</h1>
 <ul>
-<li><a href="/get">get</a></li>
 <li><a href="/action/">actions</a></li>
 </ul>
 </html>`
