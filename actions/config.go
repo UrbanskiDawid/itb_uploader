@@ -9,15 +9,13 @@ import (
 
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
+
 //Action that can be done on server
 type Action struct {
 	Name   string `json:"name"`
 	Cmd    string `json:"cmd"`
 	Server string `json:"server"`
 }
-
-var configurationActions map[string]Action
-var configurationServers map[string]Server
 
 //MyConfiguration entire configuration
 type MyConfiguration struct {
@@ -121,15 +119,4 @@ func LoadConfiguration(cfgFileName string) error {
 	}
 
 	return nil
-}
-
-func getServerByNickName(nickName string) Server {
-	nickName = strings.ToUpper(nickName)
-	return configurationServers[nickName]
-}
-
-
-func getActionByName(name string) Action {
-	name = strings.ToUpper(name)
-	return configurationActions[name]
 }
