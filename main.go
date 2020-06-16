@@ -78,7 +78,7 @@ func startServer(port int) {
 
 	http.HandleFunc("/", views.ViewIndex)
 
-	http.HandleFunc("/upload", views.ViewUploadFile)
+	http.HandleFunc("/download", views.ViewDownloadFile)
 
 	http.HandleFunc("/action/", views.ViewAllActions)
 

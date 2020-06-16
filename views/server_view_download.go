@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
@@ -52,14 +53,13 @@ func saveFile(r *http.Request) (string, error) {
 	return tempFile.Name(), nil
 }
 
-//ViewUploadFile save file
-func ViewUploadFile(w http.ResponseWriter, r *http.Request) {
-	logging.Log.Println("ViewUploadFile")
-	fmt.Println("Request ViewUploadFile")
-	
+//ViewDownloadFile save file
+func ViewDownloadFile(w http.ResponseWriter, r *http.Request) {
+	logging.Log.Println("ViewDownloadFile")
+	fmt.Println("Request ViewDownloadFile")
+
 	fileName, err := saveFile(r)
 	if err != nil {
-		fmt.Fprint(w, "error")
 		fmt.Println("File Upload: error", err)
 		logging.Log.Println("File Upload: error ", err)
 		return
