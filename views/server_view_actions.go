@@ -15,7 +15,7 @@ func ViewAllActions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	fmt.Fprintf(w, "<h1>actions #%d</h1>", len(actionViewMemory))
-	for name, mem := range actionViewMemory {
-		fmt.Fprintf(w, "<p><a href=\"%s\">Action %s</a></p>", mem.path, name)
+	for name := range actionViewMemory {
+		fmt.Fprintf(w, "<p><a href=\"%s\">Action %s</a></p>", actionViewMemory[name].path, name)
 	}
 }
