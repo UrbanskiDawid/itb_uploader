@@ -12,9 +12,20 @@ import (
 
 //Action that can be done on server
 type Action struct {
-	Name   string `json:"name"`
-	Cmd    string `json:"cmd"`
-	Server string `json:"server"`
+	Name       string `json:"name"`
+	Cmd        string `json:"cmd"`
+	Server     string `json:"server"`
+	FileTarget string `json:"fileTarget,omitempty"`
+}
+
+//Execute action
+func (a Action) Execute() (string, string, error) {
+
+	if strings.ToLower(a.Server) == "localhost" {
+		return executeLocal(a.Cmd)
+	}
+
+	return executeSSH(a.Cmd, a.Server)
 }
 
 //MyConfiguration entire configuration
@@ -40,6 +51,8 @@ func printAction(id int, action *Action) {
 	logging.Log.Println("Action #", id)
 	logging.Log.Println("Action name: ", action.Name)
 	logging.Log.Println("Action server: ", action.Server)
+	logging.Log.Println("Action target", action.FileTarget)
+	println(action.FileTarget)
 }
 
 func loadEnv() credentials {
@@ -105,7 +118,7 @@ func LoadConfiguration(cfgFileName string) error {
 	}
 
 	//ACTIONS
-	configurationActions = make(map[string]Action)
+	configurationActions = make(map[string]*Action)
 
 	actionsNum := len(cfg.Actions)
 	logging.Log.Println("actions found: ", actionsNum)
@@ -114,7 +127,7 @@ func LoadConfiguration(cfgFileName string) error {
 	}
 	for i := 0; i < actionsNum; i++ {
 		name := strings.ToUpper(cfg.Actions[i].Name)
-		configurationActions[name] = cfg.Actions[i]
+		configurationActions[name] = &cfg.Actions[i]
 		printAction(i, &cfg.Actions[i])
 	}
 

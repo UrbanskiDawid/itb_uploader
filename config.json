@@ -34,6 +34,12 @@
             "name": "date",
             "cmd": "date",
             "server": "localhost"
+        },
+        {
+            "name": "upload",
+            "fileTarget": "/home/dave/test",
+            "cmd": "echo OK;",
+            "server": "localhost"
         }
     ]
 } 

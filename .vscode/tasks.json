@@ -23,12 +23,23 @@
             "problemMatcher": []
         },
         {
-            "label": "Request: upload file",     
+            "label": "Request: download file",     
             "command": "curl",
             "args": [
                 "-F",
                 "file=@config.json",
-                "localhost:8080/upload"
+                "localhost:8080/download"
+            ],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Request: upload file",     
+            "command": "curl",
+            "args": [
+                "-F", "file=@config.json",
+                "-F", "target=/aaa/bb/cc/" ,
+                "localhost:8080/action/upload"
             ],
             "presentation": { "reveal": "never" },
             "problemMatcher": []

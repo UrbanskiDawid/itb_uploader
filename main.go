@@ -77,10 +77,7 @@ func startServer(port int) {
 	views.Init()
 
 	http.HandleFunc("/", views.ViewIndex)
-
-	http.HandleFunc("/download", views.ViewDownloadFile)
-
-	http.HandleFunc("/action/", views.ViewAllActions)
+	http.HandleFunc("/action/", views.ViewIndex)
 
 	for _, name := range actions.GetActionNames() {
 
