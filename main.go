@@ -97,8 +97,10 @@ func startServer(port int) {
 
 //doc: https://github.com/urfave/cli/blob/master/docs/v1/manual.md
 func argsParse() {
+
 	app := cli.NewApp()
-	app.Usage = "make an explosive entrance"
+	//app.Usage = "make an explosive entrance"
+	//app.UsageText = "aaa"
 
 	var configServerPort int
 
@@ -114,7 +116,7 @@ func argsParse() {
 	app.Commands = []cli.Command{
 		{
 			Name:  "server",
-			Usage: "complete a task on the list",
+			Usage: "start webserver (REST API)",
 			Action: func(c *cli.Context) error {
 				startServer(configServerPort)
 				return nil
@@ -124,6 +126,10 @@ func argsParse() {
 
 	actionNames := actions.GetActionNames()
 	for _, name := range actionNames {
+
+		if actions.IsActionWithFile(name) {
+			continue
+		}
 
 		var actionName string
 		actionName = name // note must make a copy
