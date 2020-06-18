@@ -9,10 +9,7 @@ import (
 
 var htmlIndex string = `<html>
 <h1>main</h1>
-<ul>
-<li><a href="/action/">actions</a></li>
-</ul>
-</html>`
+`
 
 // ViewIndex main page
 func ViewIndex(w http.ResponseWriter, r *http.Request) {
