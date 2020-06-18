@@ -26,17 +26,25 @@ func getAuthMethod(pass string) (ssh.AuthMethod, error) {
 	if fileExists(pass) {
 		key, err := ioutil.ReadFile(pass)
 		if err != nil {
-			return nil, err //log.Fatalf("unable to read private key: %v", err)
+			return nil, err
 		}
 
 		signer, err := ssh.ParsePrivateKey(key)
 		if err != nil {
-			return nil, err //log.Fatalf("unable to parse private key: %v", err)
+			return nil, err
 		}
 
 		return ssh.PublicKeys(signer), nil
-
 	}
+
+	if strings.HasPrefix(pass, "-----BEGIN RSA PRIVATE KEY-----") {
+		signer, err := ssh.ParsePrivateKey([]byte(pass))
+		if err != nil {
+			return nil, err
+		}
+		return ssh.PublicKeys(signer), nil
+	}
+
 	return ssh.Password(pass), nil
 }
 
