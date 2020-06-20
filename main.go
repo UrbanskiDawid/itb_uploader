@@ -142,7 +142,7 @@ func main() {
 				if actions.IsActionWithDownloadFile(actionName) {
 
 					targetFileName := "download"
-					logging.Log.Printf("download %s to %s", actions.GetSourceFileNameForAction(actionName), targetFileName)
+					logging.Log.Printf("download %s to %s", actions.GetDownloadFileNameForAction(actionName), targetFileName)
 
 					err := actions.DownloadFile(actionName, targetFileName)
 					if err != nil {

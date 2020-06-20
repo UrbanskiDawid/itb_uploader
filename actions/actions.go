@@ -19,7 +19,7 @@ func GetTargetFileNameForAction(actionName string) string {
 	return configurationActions[actionName].FileTarget
 }
 
-func GetSourceFileNameForAction(actionName string) string {
+func GetDownloadFileNameForAction(actionName string) string {
 	return configurationActions[actionName].FileDownload
 }
 

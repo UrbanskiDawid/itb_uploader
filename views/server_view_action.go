@@ -126,7 +126,7 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 			}
 			defer os.Remove(tempFile.Name())
 
-			remoteFile := actions.GetSourceFileNameForAction(actionName)
+			remoteFile := actions.GetDownloadFileNameForAction(actionName)
 			tmpFilename := tempFile.Name()
 
 			err = actions.DownloadFile(actionName, tempFile.Name())
