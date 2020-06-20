@@ -88,7 +88,6 @@ func startServer() {
 		var userVisibleNameName string
 		userVisibleNameName = generateUserVisibleActionName(name)
 		http.HandleFunc("/action/"+userVisibleNameName, views.BuildViewAction(userVisibleNameName, actionName))
-		//println("/action/" + userVisibleNameName)
 	}
 
 	fmt.Println("starting server port", port)
