@@ -7,7 +7,7 @@
             
             "label": "go run",
             "type": "shell",
-            "command": "go run .  -- server",
+            "command": "go run .  server",
             "group": {
                 "kind": "build",
                 "isDefault": true
