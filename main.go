@@ -8,15 +8,17 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 	"github.com/UrbanskiDawid/itb_uploader/views"
-	"github.com/urfave/cli"
+	"github.com/spf13/cobra"
 )
 
 var logger log.Logger
+var port uint64 = 8080
 
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
@@ -33,10 +35,10 @@ func findConfigFileName() (string, error) {
 	if err == nil {
 		fn := path.Join(usr.HomeDir, "itb_uploader.json")
 		if fileExists(fn) {
-			fmt.Println("configuration file found in: ", fn)
+			logging.Log.Println("configuration file found in: ", fn)
 			return fn, nil
 		} else {
-			fmt.Println("configuration file not found in: ", fn)
+			logging.Log.Println("configuration file not found in: ", fn)
 		}
 	}
 
@@ -50,7 +52,7 @@ func findConfigFileName() (string, error) {
 }
 
 func configInit() {
-	fmt.Println("config Init")
+	logging.Log.Println("config Init")
 
 	configFileName, err := findConfigFileName()
 	if err != nil {
@@ -61,7 +63,6 @@ func configInit() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("logging to: " + configFileName)
 }
 
 func generateUserVisibleActionName(name string) string {
@@ -72,7 +73,7 @@ func generateUserVisibleActionName(name string) string {
 	return ret
 }
 
-func startServer(port int) {
+func startServer() {
 
 	views.Init()
 
@@ -87,7 +88,7 @@ func startServer(port int) {
 		var userVisibleNameName string
 		userVisibleNameName = generateUserVisibleActionName(name)
 		http.HandleFunc("/action/"+userVisibleNameName, views.BuildViewAction(userVisibleNameName, actionName))
-		println("/action/" + userVisibleNameName)
+		//println("/action/" + userVisibleNameName)
 	}
 
 	fmt.Println("starting server port", port)
@@ -95,70 +96,74 @@ func startServer(port int) {
 	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
 
-//doc: https://github.com/urfave/cli/blob/master/docs/v1/manual.md
-func argsParse() {
-
-	app := cli.NewApp()
-	//app.Usage = "make an explosive entrance"
-	//app.UsageText = "aaa"
-
-	var configServerPort int
-
-	app.Flags = []cli.Flag{
-		cli.IntFlag{
-			Name:        "port",
-			Value:       8080,
-			Usage:       "language for the greeting",
-			Destination: &configServerPort,
-		},
-	}
-
-	app.Commands = []cli.Command{
-		{
-			Name:  "server",
-			Usage: "start webserver (REST API)",
-			Action: func(c *cli.Context) error {
-				startServer(configServerPort)
-				return nil
-			},
-		},
-	}
-
-	actionNames := actions.GetActionNames()
-	for _, name := range actionNames {
-
-		if actions.IsActionWithFile(name) {
-			continue
-		}
-
-		var actionName string
-		actionName = name // note must make a copy
-
-		var userVisibleNameName string
-		userVisibleNameName = generateUserVisibleActionName(name)
-
-		cmd := cli.Command{
-			Name: userVisibleNameName,
-			Action: func(c *cli.Context) error {
-				println("staring action '", actionName, "'")
-				stdOut, stdErr, err := actions.ExecuteAction(actionName)
-				print(stdOut)
-				print(stdErr)
-				return err
-			},
-		}
-
-		app.Commands = append(app.Commands, cmd)
-	}
-
-	err := app.Run(os.Args)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func main() {
+
 	logging.InitLogger()
 	configInit()
-	argsParse()
+
+	var rootCmd = &cobra.Command{Use: "app"}
+	var server = &cobra.Command{
+		Use:   "server [start server]",
+		Short: "server port",
+		Long:  `run this app in server mode.`,
+		Args:  cobra.MaximumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) == 1 {
+				port, _ = strconv.ParseUint(args[0], 10, 64)
+			}
+			startServer()
+			os.Exit(1)
+		},
+	}
+
+	names := actions.GetActionNames()
+	for i := 0; i < len(names); i++ {
+
+		var name = names[i]
+
+		file := actions.GetTargetFileNameForAction(name)
+
+		if file != "" {
+			var cmd = &cobra.Command{
+				Use:   name,
+				Short: fmt.Sprintf("%s [file]", name),
+				Args:  cobra.ExactArgs(1),
+				Run: func(cmd *cobra.Command, args []string) {
+
+					err := actions.UploadFile(name, args[1])
+					if err != nil {
+						print(err)
+						os.Exit(1)
+					}
+
+					stdOut, stdErr, err := actions.ExecuteAction(name)
+					print(stdOut)
+					if err != nil {
+						print(stdErr)
+						os.Exit(1)
+					}
+				},
+			}
+			rootCmd.AddCommand(cmd)
+		} else {
+			var cmd = &cobra.Command{
+				Use:  name,
+				Args: cobra.NoArgs,
+				Run: func(cmd *cobra.Command, args []string) {
+					stdOut, stdErr, err := actions.ExecuteAction(name)
+					print(stdOut)
+					if err != nil {
+						print(stdErr)
+						os.Exit(1)
+					}
+				},
+			}
+			rootCmd.AddCommand(cmd)
+		}
+	}
+
+	//rootCmd.PersistentFlags().StringVar(&configFileName, "config", "", "Author name for copyright attribution")
+
+	rootCmd.AddCommand(server)
+	rootCmd.Execute()
 }
