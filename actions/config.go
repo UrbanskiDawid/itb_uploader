@@ -12,10 +12,11 @@ import (
 
 //Action that can be done on server
 type Action struct {
-	Name       string `json:"name"`
-	Cmd        string `json:"cmd"`
-	Server     string `json:"server"`
-	FileTarget string `json:"fileTarget,omitempty"`
+	Name         string `json:"name"`
+	Cmd          string `json:"cmd"`
+	Server       string `json:"server"`
+	FileTarget   string `json:"fileTarget,omitempty"`
+	FileDownload string `json:"fileDownload,omitempty"`
 }
 
 //Execute action
@@ -52,7 +53,8 @@ func printAction(id int, action *Action) {
 	logging.Log.Println("Action name: ", action.Name)
 	logging.Log.Println("Action server: ", action.Server)
 	logging.Log.Println("Action target", action.FileTarget)
-	logging.Log.Println(action.FileTarget)
+	logging.Log.Println("Action upload [file]:", action.FileTarget)
+	logging.Log.Println("Action download [file]:", action.FileDownload)
 }
 
 func loadEnv() credentials {

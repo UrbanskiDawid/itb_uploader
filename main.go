@@ -118,47 +118,55 @@ func main() {
 	names := actions.GetActionNames()
 	for i := 0; i < len(names); i++ {
 
-		var name = names[i]
+		var actionName = names[i]
 
-		file := actions.GetTargetFileNameForAction(name)
+		var cmd = &cobra.Command{
+			Use: actionName,
+			Run: func(cmd *cobra.Command, args []string) {
 
-		if file != "" {
-			var cmd = &cobra.Command{
-				Use:   name,
-				Short: fmt.Sprintf("%s [file]", name),
-				Args:  cobra.ExactArgs(1),
-				Run: func(cmd *cobra.Command, args []string) {
-
-					err := actions.UploadFile(name, args[1])
+				if actions.IsActionWithUploadFile(actionName) {
+					err := actions.UploadFile(actionName, args[1])
 					if err != nil {
 						print(err)
 						os.Exit(1)
 					}
+				}
 
-					stdOut, stdErr, err := actions.ExecuteAction(name)
-					print(stdOut)
+				stdOut, stdErr, err := actions.ExecuteAction(actionName)
+				print(stdOut)
+				if err != nil {
+					print(stdErr)
+					os.Exit(1)
+				}
+
+				if actions.IsActionWithDownloadFile(actionName) {
+
+					targetFileName := "download"
+					logging.Log.Printf("download %s to %s", actions.GetSourceFileNameForAction(actionName), targetFileName)
+
+					err := actions.DownloadFile(actionName, targetFileName)
 					if err != nil {
+						print("ERROR", err)
 						print(stdErr)
 						os.Exit(1)
 					}
-				},
-			}
-			rootCmd.AddCommand(cmd)
-		} else {
-			var cmd = &cobra.Command{
-				Use:  name,
-				Args: cobra.NoArgs,
-				Run: func(cmd *cobra.Command, args []string) {
-					stdOut, stdErr, err := actions.ExecuteAction(name)
-					print(stdOut)
-					if err != nil {
-						print(stdErr)
-						os.Exit(1)
-					}
-				},
-			}
-			rootCmd.AddCommand(cmd)
+					println("new file:", targetFileName)
+				}
+			},
 		}
+
+		short := ""
+		if actions.IsActionWithUploadFile(actionName) {
+			cmd.Args = cobra.ExactArgs(1)
+			short = fmt.Sprintf("%s [file]", actionName)
+		}
+		if actions.IsActionWithDownloadFile(actionName) {
+			short = fmt.Sprintf("%sthis cmd will download file", short)
+		}
+		cmd.Short = short
+
+		rootCmd.AddCommand(cmd)
+
 	}
 
 	//rootCmd.PersistentFlags().StringVar(&configFileName, "config", "", "Author name for copyright attribution")

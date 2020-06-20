@@ -87,7 +87,7 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 
 		mem.running = true
 
-		if actions.IsActionWithFile(actionName) {
+		if actions.IsActionWithUploadFile(actionName) {
 
 			fileName, err := SaveFile(r)
 			if err != nil {

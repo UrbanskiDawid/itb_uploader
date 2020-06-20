@@ -19,8 +19,16 @@ func GetTargetFileNameForAction(actionName string) string {
 	return configurationActions[actionName].FileTarget
 }
 
-func IsActionWithFile(name string) bool {
+func GetSourceFileNameForAction(actionName string) string {
+	return configurationActions[actionName].FileDownload
+}
+
+func IsActionWithUploadFile(name string) bool {
 	return configurationActions[name].FileTarget != ""
+}
+
+func IsActionWithDownloadFile(name string) bool {
+	return configurationActions[name].FileDownload != ""
 }
 
 func isLocalhost(action *Action) bool {
@@ -56,7 +64,7 @@ func UploadFile(actionName string, localFile string) error {
 func DownloadFile(actionName string, localFile string) error {
 	action := getActionByName(actionName)
 	if isLocalhost(action) {
-		return copyFileLocal(action.FileTarget, localFile)
+		return copyFileLocal(action.FileDownload, localFile)
 	}
-	return downloadFileSSH(action.Server, localFile, action.FileTarget)
+	return downloadFileSSH(action.Server, localFile, action.FileDownload)
 }

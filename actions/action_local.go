@@ -2,6 +2,7 @@ package actions
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -44,6 +45,11 @@ func executeLocal(cmd string) (string, string, error) {
 // Copy the src file to dst. Any existing file will be overwritten and will not
 // copy file attributes.
 func copyFileLocal(src, dst string) error {
+
+	if !fileExists(src) {
+		return errors.New("file '" + src + "' does not exist")
+	}
+
 	in, err := os.Open(src)
 	if err != nil {
 		return err
