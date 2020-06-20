@@ -52,7 +52,7 @@ func printAction(id int, action *Action) {
 	logging.Log.Println("Action name: ", action.Name)
 	logging.Log.Println("Action server: ", action.Server)
 	logging.Log.Println("Action target", action.FileTarget)
-	println(action.FileTarget)
+	logging.Log.Println(action.FileTarget)
 }
 
 func loadEnv() credentials {
