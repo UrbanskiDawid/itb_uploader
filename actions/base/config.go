@@ -44,7 +44,7 @@ func unifyServerName(name string) string {
 var re = regexp.MustCompile(`[^0-9A-Za-z_]`)
 
 func unifyActionName(name string) string {
-	name = strings.ToUpper(name)
+	name = strings.ToLower(name)
 	name = re.ReplaceAllString(name, "_")
 	return name
 }
