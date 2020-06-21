@@ -53,7 +53,7 @@ func configInit() {
 		panic(err)
 	}
 
-	err = actions.LoadConfiguration(configFileName)
+	err = actions.Init(configFileName)
 	if err != nil {
 		panic(err)
 	}

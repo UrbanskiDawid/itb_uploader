@@ -13,6 +13,11 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+type executorSsh struct {
+	action Action
+	server Server
+}
+
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -48,9 +53,7 @@ func getAuthMethod(pass string) (ssh.AuthMethod, error) {
 	return ssh.Password(pass), nil
 }
 
-func configureSSHforServer(serverName string) (*ssh.Client, error) {
-
-	server := getServerByNickName(serverName)
+func configureSSHforServer(server Server) (*ssh.Client, error) {
 
 	auth, err := getAuthMethod(server.Auth.Pass)
 	if err != nil {
@@ -68,12 +71,16 @@ func configureSSHforServer(serverName string) (*ssh.Client, error) {
 	return ssh.Dial("tcp", host, sshConfig)
 }
 
-func executeSSH(cmd string, serverName string) (string, string, error) {
+func (e executorSsh) Execute() (string, string, error) {
+
+	cmd := e.action.Cmd
+
+	serverName := e.action.Server
 
 	logging.Log.Println("executeSSH", serverName, "cmd", cmd)
 
 	//COMMON-------
-	client, err := configureSSHforServer(serverName)
+	client, err := configureSSHforServer(e.server)
 	if err != nil {
 		logging.Log.Print("executeSSH configureSSHforServer fail")
 		return "", "", err
@@ -106,13 +113,15 @@ func executeSSH(cmd string, serverName string) (string, string, error) {
 }
 
 //UploadFile send local file
-func uploadFileSSH(serverName string, localFile string, remoteFile string) error {
+func (e executorSsh) UploadFile(localFile string) (error, string) {
+
+	remoteFile := e.action.FileTarget
 
 	//COMMON-------
-	conn, err := configureSSHforServer(serverName)
+	conn, err := configureSSHforServer(e.server)
 	if err != nil {
 		logging.Log.Print("sendFile configureSSHforServer fail")
-		return err
+		return err, ""
 	}
 	defer conn.Close()
 	//---
@@ -120,75 +129,81 @@ func uploadFileSSH(serverName string, localFile string, remoteFile string) error
 	// create new SFTP client
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	defer client.Close()
 
 	// create destination file
 	dstFile, err := client.Create(remoteFile)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	defer dstFile.Close()
 
 	// create source file
 	srcFile, err := os.Open(localFile)
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	// copy source file to destination file
 	bytes, err := io.Copy(dstFile, srcFile)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	fmt.Printf("%d bytes copied\n", bytes)
-	return nil
+	return nil, remoteFile
 }
 
 //DownloadFile get remote file
-func downloadFileSSH(serverName string, localFile string, remoteFile string) error {
+func (e executorSsh) DownloadFile(localFile string) (error, string) {
+
+	remoteFile := e.action.FileDownload
 
 	// connect
-	conn, err := configureSSHforServer(serverName)
+	conn, err := configureSSHforServer(e.server)
 	if err != nil {
 		logging.Log.Print("sendFile configureSSHforServer fail")
-		return err
+		return err, ""
 	}
 	defer conn.Close()
 
 	// create new SFTP client
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	defer client.Close()
 
 	// create destination file
 	dstFile, err := os.Create(localFile)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	defer dstFile.Close()
 
 	// open source file
 	srcFile, err := client.Open(remoteFile)
 	if err != nil {
-		return err
+		return err, ""
 	}
 
 	// copy source file to destination file
 	bytes, err := io.Copy(dstFile, srcFile)
 	if err != nil {
-		return err
+		return err, ""
 	}
 	fmt.Printf("%d bytes copied\n", bytes)
 
 	// flush in-memory copy
 	err = dstFile.Sync()
 	if err != nil {
-		return err
+		return err, ""
 	}
 
-	return nil
+	return nil, remoteFile
+}
+
+func (e executorSsh) GetAction() Action {
+	return e.action
 }

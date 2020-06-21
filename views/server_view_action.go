@@ -80,6 +80,8 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 
 	mem := actionViewMemory[actionName]
 
+	executor := actions.EXECUTORS.GetByName(actionName)
+
 	if mem.running {
 		fmt.Fprint(w, "busy")
 	} else {
@@ -87,7 +89,9 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 
 		mem.running = true
 
-		if actions.IsActionWithUploadFile(actionName) {
+		action := executor.GetAction()
+
+		if action.HasUploadFile() {
 
 			fileName, err := SaveFile(r)
 			if err != nil {
@@ -98,7 +102,7 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 			logging.Log.Println("uploading file: ", fileName)
 			fmt.Println("uploading file: ", fileName)
 
-			err = actions.UploadFile(actionName, fileName)
+			err, _ = executor.UploadFile(fileName)
 			if err != nil {
 
 				logging.Log.Println("fail", err)
@@ -107,7 +111,7 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if actions.IsActionWithDownloadFile(actionName) {
+		if action.HasDownloadFile() {
 
 			//temp file
 			path, err := os.Getwd()
@@ -126,17 +130,17 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 			}
 			defer os.Remove(tempFile.Name())
 
-			remoteFile := actions.GetDownloadFileNameForAction(actionName)
+			//remoteFile := executor..GetDownloadFileNameForAction(actionName)
 			tmpFilename := tempFile.Name()
 
-			err = actions.DownloadFile(actionName, tempFile.Name())
-			if err != nil {
-				logging.Log.Println("fail", err)
-				fmt.Println("fail: ", err)
+			err2, remoteFile := executor.DownloadFile(tempFile.Name())
+			if err2 != nil {
+				logging.Log.Println("fail", err2)
+				fmt.Println("fail: ", err2)
 				return
 			}
 
-			fmt.Println("Client requests: " + remoteFile)
+			//fmt.Println("Client requests: " + remoteFile)
 
 			//Check if file exists and open
 			Openfile, err := os.Open(tmpFilename)
@@ -173,18 +177,24 @@ func runAction(actionName string, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		go func() {
+		if action.HasCommand() {
+
+			go func() {
+				defer mem.lock.Unlock()
+
+				ret, _, err := executor.Execute()
+				if err == nil {
+					mem.out = ret
+				}
+				mem.running = false
+
+				logging.Log.Println("runAction cmd: ", actionName, "end")
+				fmt.Println("runAction cmd:", actionName, "end")
+			}()
+		} else {
 			defer mem.lock.Unlock()
-
-			ret, _, err := actions.ExecuteAction(actionName)
-			if err == nil {
-				mem.out = ret
-			}
 			mem.running = false
-
-			logging.Log.Println("runAction cmd: ", actionName, "end")
-			fmt.Println("runAction cmd:", actionName, "end")
-		}()
+		}
 
 		fmt.Fprint(w, "srarted")
 	}

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
@@ -17,14 +16,14 @@ func generateUserVisibleActionName(name string) string {
 	return ret
 }
 
-func StartServer(port uint64) {
+func StartServer(port uint64, actionNames []string) {
 
 	Init()
 
 	http.HandleFunc("/", ViewIndex)
 	http.HandleFunc("/action/", ViewIndex)
 
-	for _, name := range actions.GetActionNames() {
+	for _, name := range actionNames {
 
 		var actionName string
 		actionName = name // note must make a copy

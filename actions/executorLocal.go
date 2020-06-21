@@ -11,7 +11,13 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
-func executeLocal(cmd string) (string, string, error) {
+type ExecutorLocal struct {
+	action Action
+}
+
+func (e ExecutorLocal) Execute() (string, string, error) {
+
+	cmd := e.action.Cmd
 
 	logging.Log.Println("executeLocal", cmd)
 
@@ -67,4 +73,18 @@ func copyFileLocal(src, dst string) error {
 		return err
 	}
 	return out.Close()
+}
+
+func (e ExecutorLocal) UploadFile(localFile string) (error, string) {
+	target := e.action.FileTarget
+	return copyFileLocal(localFile, target), target
+}
+
+func (e ExecutorLocal) DownloadFile(remoteFile string) (error, string) {
+	localFile := e.action.FileDownload
+	return copyFileLocal(localFile, remoteFile), localFile
+}
+
+func (e ExecutorLocal) GetAction() Action {
+	return e.action
 }

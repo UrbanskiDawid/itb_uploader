@@ -10,51 +10,10 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
-//Action that can be done on server
-type Action struct {
-	Name         string `json:"name"`
-	Cmd          string `json:"cmd"`
-	Server       string `json:"server"`
-	FileTarget   string `json:"fileTarget,omitempty"`
-	FileDownload string `json:"fileDownload,omitempty"`
-}
-
-//Execute action
-func (a Action) Execute() (string, string, error) {
-
-	if strings.ToLower(a.Server) == "localhost" {
-		return executeLocal(a.Cmd)
-	}
-
-	return executeSSH(a.Cmd, a.Server)
-}
-
 //MyConfiguration entire configuration
 type MyConfiguration struct {
 	Servers []Server `json:"servers"`
 	Actions []Action `json:"actions"`
-}
-
-//Server definition of remote machine
-type Server struct {
-	NickName string      `json:"nickname"`
-	Host     string      `json:"host"`
-	Port     int         `json:"port"`
-	Auth     credentials `json:"auth"`
-}
-
-type credentials struct {
-	User string `json:"user"`
-	Pass string `json:"pass"`
-}
-
-func printAction(id int, action *Action) {
-	logging.Log.Println("Action #", id)
-	logging.Log.Println("Action name: ", action.Name)
-	logging.Log.Println("Action server: ", action.Server)
-	logging.Log.Println("Action target", action.FileTarget)
-	logging.Log.Println("Action upload [file]:", action.FileTarget)
-	logging.Log.Println("Action download [file]:", action.FileDownload)
 }
 
 func loadEnv() credentials {
@@ -73,65 +32,56 @@ func overrideServerAuth(auth *credentials, overrideAuth *credentials) {
 	}
 }
 
-func printServer(id int, server *Server) {
-	logging.Log.Println("Server #", id)
-	logging.Log.Println("Server Nick: ", server.NickName)
-	logging.Log.Println("Server Host: ", server.Host)
-	logging.Log.Println("Server User: ", server.Auth.User)
-	logging.Log.Println("Server Pass: ", server.Auth.Pass)
-	logging.Log.Println("Server port: ", server.Port)
+func overrideServerName(name string) string {
+	name = strings.ToUpper(name)
+	if name == "localhost" {
+		name = ""
+	}
+	return name
 }
 
-func LoadConfiguration(cfgFileName string) error {
+func loadConfigurationFromJson(cfgFileName string) (error, *MyConfiguration) {
 
 	//load MyConfiguration from file
 	jsonFile, err := os.Open(cfgFileName)
 	if err != nil {
-		return err
+		return err, nil
 	}
 
 	var cfg MyConfiguration
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
-		return err
+		return err, nil
 	}
 
 	err = json.Unmarshal(byteValue, &cfg)
 	if err != nil {
-		return err
+		return err, nil
 	}
 	logging.Log.Println("configuration loaded from ", cfgFileName)
 
 	//SERVERS
-	configurationServers = make(map[string]Server)
-
 	serversNum := len(cfg.Servers)
 	logging.Log.Println("servers found: ", serversNum)
 	if serversNum == 0 {
-		return errors.New("no servers found in configuration")
+		return errors.New("no servers found in configuration"), nil
 	}
 	authFromEnviroment := loadEnv()
 
 	for i := 0; i < serversNum; i++ {
-		nickName := strings.ToUpper(cfg.Servers[i].NickName)
 		overrideServerAuth(&cfg.Servers[i].Auth, &authFromEnviroment)
-		configurationServers[nickName] = cfg.Servers[i]
-		printServer(i, &cfg.Servers[i])
+		cfg.Servers[i].NickName = overrideServerName(cfg.Servers[i].NickName)
 	}
 
 	//ACTIONS
-	configurationActions = make(map[string]*Action)
-
 	actionsNum := len(cfg.Actions)
 	logging.Log.Println("actions found: ", actionsNum)
 	if serversNum == 0 {
-		return errors.New("no actions found in configuration")
+		return errors.New("no actions found in configuration"), nil
 	}
 	for i := 0; i < actionsNum; i++ {
-		name := strings.ToUpper(cfg.Actions[i].Name)
-		configurationActions[name] = &cfg.Actions[i]
-		printAction(i, &cfg.Actions[i])
+		cfg.Actions[i].Server = overrideServerName(cfg.Actions[i].Server)
 	}
 
-	return nil
+	return nil, &cfg
 }
