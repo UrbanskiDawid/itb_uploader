@@ -30,14 +30,16 @@ func Init() {
 
 const tempFolder string = "TEMP"
 const formFileID string = "file"
-const maxFileSize int64 = 125000 * 50 //50Mbit
+const maxFileSize int64 = 32 << 10
 
 //source: https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
 func SaveFile(r *http.Request) (string, error) {
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
-	r.ParseMultipartForm(maxFileSize)
-
+	err := r.ParseMultipartForm(maxFileSize)
+	if err != nil {
+		return "", err
+	}
 	// FormFile returns the first file for the given key `myFile`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
@@ -76,24 +78,26 @@ func SaveFile(r *http.Request) (string, error) {
 	return fullFileName, nil
 }
 
-func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request) {
+func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request) string {
 
 	fileName, err := SaveFile(r)
 	if err != nil {
 		fmt.Fprint(w, "file error")
+		return ""
 	}
 	defer os.Remove(fileName)
 
 	logging.Log.Println("uploading file: ", fileName)
-	fmt.Println("uploading file: ", fileName)
+	fmt.Println("uploading file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server)
 
-	err, _ = action.UploadFile(fileName)
-	if err != nil {
+	err2, remoteFile := action.UploadFile(fileName)
+	if err2 != nil {
 
-		logging.Log.Println("fail", err)
-		fmt.Println("fail: ", err)
-		return
+		logging.Log.Println("fail", err2)
+		fmt.Println("fail: ", err2)
+		return "fail"
 	}
+	return remoteFile
 }
 
 func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Request) {
@@ -185,22 +189,22 @@ func runAction(action base.Action, w http.ResponseWriter, r *http.Request) {
 
 		mem.running = true
 
+		defer mem.lock.Unlock()
+
 		if action.GetDescription().HasUploadFile() {
-			runActionUpload(action, w, r)
+			mem.out = runActionUpload(action, w, r)
+			fmt.Fprint(w, mem.out)
 		}
 		if action.GetDescription().HasDownloadFile() {
 			runActionDownload(action, w, r)
 		}
 		if action.GetDescription().HasCommand() {
 			mem.out = runActionCommand(action, w, r)
+			fmt.Fprint(w, mem.out)
 		}
 
-		fmt.Fprint(w, "srarted")
-
-		defer mem.lock.Unlock()
 		mem.running = false
 	}
-
 }
 
 //BuildViewAction generate function for server to handle action
