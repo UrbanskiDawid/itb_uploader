@@ -57,6 +57,8 @@ func configInit() {
 	if err != nil {
 		panic(err)
 	}
+
+	logging.Log.Println("config:", configFileName)
 }
 
 func main() {

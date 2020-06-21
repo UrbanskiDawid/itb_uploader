@@ -32,6 +32,8 @@ func StartServer(port uint64) {
 		actionName = name // note must make a copy
 		action := actions.ACTIONS.GetByName(name)
 		http.HandleFunc("/action/"+actionName, BuildViewAction(action))
+
+		fmt.Printf("/action/" + actionName + "\n")
 	}
 
 	fmt.Println("starting server port", port)

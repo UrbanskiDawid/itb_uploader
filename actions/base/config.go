@@ -35,7 +35,7 @@ func overrideServerAuth(auth *Credentials, overrideAuth *Credentials) {
 
 func unifyServerName(name string) string {
 	name = strings.ToUpper(name)
-	if name == "localhost" {
+	if name == "LOCALHOST" {
 		name = ""
 	}
 	return name
@@ -76,6 +76,12 @@ func LoadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 		return errors.New("no servers found in configuration"), nil
 	}
 	authFromEnviroment := loadEnv()
+
+	//Add localhost
+	var localhostServer Server
+	localhostServer.NickName = ""
+	localhostServer.Port = 0
+	cfg.Servers = append(cfg.Servers, localhostServer)
 
 	for i := 0; i < serversNum; i++ {
 		overrideServerAuth(&cfg.Servers[i].Auth, &authFromEnviroment)

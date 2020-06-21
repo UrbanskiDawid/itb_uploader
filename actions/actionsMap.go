@@ -68,11 +68,11 @@ func Init(jsonConfigFile string) error {
 	if err == nil {
 		//ACTIONS.Init()
 		ACTIONS.all = make(map[string]base.Action)
-		buildAllExecutors(cfg.Descriptions, cfg.Servers,
+		err := buildAllExecutors(cfg.Descriptions, cfg.Servers,
 			func(exe base.Action) {
 				ACTIONS.all[exe.GetDescription().Name] = exe
 			})
-		return nil
+		return err
 	}
 	return err
 }
