@@ -1,4 +1,4 @@
-package actions
+package base
 
 import "github.com/UrbanskiDawid/itb_uploader/logging"
 
@@ -7,10 +7,10 @@ type Server struct {
 	NickName string      `json:"nickname"`
 	Host     string      `json:"host"`
 	Port     int         `json:"port"`
-	Auth     credentials `json:"auth"`
+	Auth     Credentials `json:"auth"`
 }
 
-type credentials struct {
+type Credentials struct {
 	User string `json:"user"`
 	Pass string `json:"pass"`
 }

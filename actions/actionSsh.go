@@ -8,14 +8,16 @@ import (
 	"os"
 	"strings"
 
+	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
-type executorSsh struct {
-	action Action
-	server Server
+type actionSsh struct {
+	desc   base.Description
+	server base.Server
+	//todo ssh.ClientConfig
 }
 
 func fileExists(filename string) bool {
@@ -53,7 +55,7 @@ func getAuthMethod(pass string) (ssh.AuthMethod, error) {
 	return ssh.Password(pass), nil
 }
 
-func configureSSHforServer(server Server) (*ssh.Client, error) {
+func configureSSHforServer(server base.Server) (*ssh.Client, error) {
 
 	auth, err := getAuthMethod(server.Auth.Pass)
 	if err != nil {
@@ -71,11 +73,11 @@ func configureSSHforServer(server Server) (*ssh.Client, error) {
 	return ssh.Dial("tcp", host, sshConfig)
 }
 
-func (e executorSsh) Execute() (string, string, error) {
+func (e actionSsh) Execute() (string, string, error) {
 
-	cmd := e.action.Cmd
+	cmd := e.desc.Cmd
 
-	serverName := e.action.Server
+	serverName := e.desc.Server
 
 	logging.Log.Println("executeSSH", serverName, "cmd", cmd)
 
@@ -113,9 +115,9 @@ func (e executorSsh) Execute() (string, string, error) {
 }
 
 //UploadFile send local file
-func (e executorSsh) UploadFile(localFile string) (error, string) {
+func (e actionSsh) UploadFile(localFile string) (error, string) {
 
-	remoteFile := e.action.FileTarget
+	remoteFile := e.desc.FileTarget
 
 	//COMMON-------
 	conn, err := configureSSHforServer(e.server)
@@ -156,9 +158,9 @@ func (e executorSsh) UploadFile(localFile string) (error, string) {
 }
 
 //DownloadFile get remote file
-func (e executorSsh) DownloadFile(localFile string) (error, string) {
+func (e actionSsh) DownloadFile(localFile string) (error, string) {
 
-	remoteFile := e.action.FileDownload
+	remoteFile := e.desc.FileDownload
 
 	// connect
 	conn, err := configureSSHforServer(e.server)
@@ -204,6 +206,6 @@ func (e executorSsh) DownloadFile(localFile string) (error, string) {
 	return nil, remoteFile
 }
 
-func (e executorSsh) GetAction() Action {
-	return e.action
+func (e actionSsh) GetDescription() base.Description {
+	return e.desc
 }

@@ -1,29 +1,30 @@
-package actions
+package base
 
 import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
-//MyConfiguration entire configuration
-type MyConfiguration struct {
-	Servers []Server `json:"servers"`
-	Actions []Action `json:"actions"`
+//Configuration entire configuration
+type Configuration struct {
+	Servers      []Server      `json:"servers"`
+	Descriptions []Description `json:"actions"`
 }
 
-func loadEnv() credentials {
-	var ret credentials
+func loadEnv() Credentials {
+	var ret Credentials
 	ret.User = os.Getenv("SSH_USER")
 	ret.Pass = os.Getenv("SSH_PASS")
 	return ret
 }
 
-func overrideServerAuth(auth *credentials, overrideAuth *credentials) {
+func overrideServerAuth(auth *Credentials, overrideAuth *Credentials) {
 	if overrideAuth.User != "" {
 		auth.User = overrideAuth.User
 	}
@@ -32,7 +33,7 @@ func overrideServerAuth(auth *credentials, overrideAuth *credentials) {
 	}
 }
 
-func overrideServerName(name string) string {
+func unifyServerName(name string) string {
 	name = strings.ToUpper(name)
 	if name == "localhost" {
 		name = ""
@@ -40,7 +41,15 @@ func overrideServerName(name string) string {
 	return name
 }
 
-func loadConfigurationFromJson(cfgFileName string) (error, *MyConfiguration) {
+var re = regexp.MustCompile(`[^0-9A-Za-z_]`)
+
+func unifyActionName(name string) string {
+	name = strings.ToUpper(name)
+	name = re.ReplaceAllString(name, "_")
+	return name
+}
+
+func LoadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 
 	//load MyConfiguration from file
 	jsonFile, err := os.Open(cfgFileName)
@@ -48,7 +57,7 @@ func loadConfigurationFromJson(cfgFileName string) (error, *MyConfiguration) {
 		return err, nil
 	}
 
-	var cfg MyConfiguration
+	var cfg Configuration
 	byteValue, err := ioutil.ReadAll(jsonFile)
 	if err != nil {
 		return err, nil
@@ -70,17 +79,18 @@ func loadConfigurationFromJson(cfgFileName string) (error, *MyConfiguration) {
 
 	for i := 0; i < serversNum; i++ {
 		overrideServerAuth(&cfg.Servers[i].Auth, &authFromEnviroment)
-		cfg.Servers[i].NickName = overrideServerName(cfg.Servers[i].NickName)
+		cfg.Servers[i].NickName = unifyServerName(cfg.Servers[i].NickName)
 	}
 
-	//ACTIONS
-	actionsNum := len(cfg.Actions)
-	logging.Log.Println("actions found: ", actionsNum)
+	//ACTION DESCRITIONS
+	actionsNum := len(cfg.Descriptions)
+	logging.Log.Println("action descriptions found: ", actionsNum)
 	if serversNum == 0 {
-		return errors.New("no actions found in configuration"), nil
+		return errors.New("no actions descriptions found in configuration"), nil
 	}
 	for i := 0; i < actionsNum; i++ {
-		cfg.Actions[i].Server = overrideServerName(cfg.Actions[i].Server)
+		cfg.Descriptions[i].Server = unifyServerName(cfg.Descriptions[i].Server)
+		cfg.Descriptions[i].Name = unifyActionName(cfg.Descriptions[i].Name)
 	}
 
 	return nil, &cfg

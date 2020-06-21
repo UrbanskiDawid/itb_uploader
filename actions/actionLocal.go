@@ -8,16 +8,18 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/UrbanskiDawid/itb_uploader/actions/base"
+
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
-type ExecutorLocal struct {
-	action Action
+type ActionLocal struct {
+	desc base.Description
 }
 
-func (e ExecutorLocal) Execute() (string, string, error) {
+func (e ActionLocal) Execute() (string, string, error) {
 
-	cmd := e.action.Cmd
+	cmd := e.desc.Cmd
 
 	logging.Log.Println("executeLocal", cmd)
 
@@ -75,16 +77,16 @@ func copyFileLocal(src, dst string) error {
 	return out.Close()
 }
 
-func (e ExecutorLocal) UploadFile(localFile string) (error, string) {
-	target := e.action.FileTarget
+func (e ActionLocal) UploadFile(localFile string) (error, string) {
+	target := e.desc.FileTarget
 	return copyFileLocal(localFile, target), target
 }
 
-func (e ExecutorLocal) DownloadFile(remoteFile string) (error, string) {
-	localFile := e.action.FileDownload
+func (e ActionLocal) DownloadFile(remoteFile string) (error, string) {
+	localFile := e.desc.FileDownload
 	return copyFileLocal(localFile, remoteFile), localFile
 }
 
-func (e ExecutorLocal) GetAction() Action {
-	return e.action
+func (e ActionLocal) GetDescription() base.Description {
+	return e.desc
 }

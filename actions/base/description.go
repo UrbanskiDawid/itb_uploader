@@ -1,9 +1,9 @@
-package actions
+package base
 
 import "github.com/UrbanskiDawid/itb_uploader/logging"
 
-//Action that can be done on server
-type Action struct {
+//ActionConfiguration that can be done on server
+type Description struct {
 	Name         string `json:"name"`
 	Cmd          string `json:"cmd"`
 	Server       string `json:"server,omitempty"` //omit=localhost
@@ -11,23 +11,23 @@ type Action struct {
 	FileDownload string `json:"fileDownload,omitempty"`
 }
 
-func (a Action) IsLocalAction() bool {
+func (a Description) IsLocalAction() bool {
 	return a.Server == ""
 }
 
-func (a Action) HasUploadFile() bool {
+func (a Description) HasUploadFile() bool {
 	return a.FileTarget != ""
 }
 
-func (a Action) HasDownloadFile() bool {
+func (a Description) HasDownloadFile() bool {
 	return a.FileDownload != ""
 }
 
-func (a Action) HasCommand() bool {
+func (a Description) HasCommand() bool {
 	return a.Cmd != ""
 }
 
-func printAction(id int, action *Action) {
+func printAction(id int, action *Description) {
 	logging.Log.Println("Action #", id)
 	logging.Log.Println("Action name: ", action.Name)
 	logging.Log.Println("Action server: ", action.Server)

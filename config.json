@@ -38,18 +38,15 @@
         {
             "name": "upload",
             "fileTarget": "/home/dave/test",
-            "cmd": "echo OK;",
             "server": "localhost"
         },
         {
             "name": "download1",
             "fileDownload": "/home/dave/GIT/GO/go.mod",
-            "cmd": "echo OK;",
             "server": "localhost"
         },
         {
             "name": "download2",
-            "fileDownload": "/home/dawid/a.py",
             "server": "mini"
         }
     ]
