@@ -52,8 +52,8 @@ func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request)
 	logging.LogConsole(logPrefix + fmt.Sprintf("received: '%s' uploading...", handler.Filename))
 
 	//create tmp file
-	tmpFile, err := tmp.OpenTmpFile("upload" + handler.Filename)
-	if err != nil {
+	tmpFile := tmp.OpenTmpFile("upload" + handler.Filename)
+	if tmpFile == nil {
 		logging.LogConsole(logPrefix + fmt.Sprintf("error: cant create tmp file"))
 		return "error: file read"
 	}
