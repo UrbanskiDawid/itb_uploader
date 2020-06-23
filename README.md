@@ -1,12 +1,11 @@
 # ITB UPLOADER
 [![](https://github.com/UrbanskiDawid/itb_uploader/workflows/build/badge.svg)](https://github.com/UrbanskiDawid/itb_uploader/actions?query=workflow%3Abuild)[![Go Report Card](https://goreportcard.com/badge/github.com/UrbanskiDawid/itb_uploader)](https://goreportcard.com/report/github.com/UrbanskiDawid/itb_uploader)
 
-### REST api for ssh commands & files
+### REST api for executing ssh commands & ssh files transfers 
 
 # WARNING
 
-WIP, do not use in production!
-code quality: bad, this is my first experiment with GO lang
+**WIP**, do not use in production! Code quality: bad, this is my first experiment with GO language.
 
 
 ## how to use
@@ -88,3 +87,5 @@ in **config.json** in *actions* define:
 
 ## start as server
 ```$ ./itb_uploader.linux server```
+
+All commands are triggered by http calls so you don't have to use this client, curl/wget are fine.  
