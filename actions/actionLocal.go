@@ -82,9 +82,27 @@ func (e ActionLocal) UploadFile(localFile string) (error, string) {
 	return copyFileLocal(localFile, target), target
 }
 
-func (e ActionLocal) DownloadFile(remoteFile string) (error, string) {
-	localFile := e.desc.FileDownload
-	return copyFileLocal(localFile, remoteFile), localFile
+func (e ActionLocal) DownloadFile(outFile *os.File) (error, string) {
+	src := e.desc.FileDownload
+
+	defer outFile.Close()
+
+	if !fileExists(src) {
+		return errors.New("file '" + src + "' does not exist"), ""
+	}
+
+	in, err := os.Open(src)
+	if err != nil {
+		return err, ""
+	}
+	defer in.Close()
+
+	_, err = io.Copy(outFile, in)
+	if err != nil {
+		return err, ""
+	}
+
+	return nil, src
 }
 
 func (e ActionLocal) GetDescription() base.Description {

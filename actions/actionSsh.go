@@ -158,7 +158,9 @@ func (e actionSsh) UploadFile(localFile string) (error, string) {
 }
 
 //DownloadFile get remote file
-func (e actionSsh) DownloadFile(localFile string) (error, string) {
+func (e actionSsh) DownloadFile(dstFile *os.File) (error, string) {
+
+	defer dstFile.Close()
 
 	remoteFile := e.desc.FileDownload
 
@@ -176,13 +178,6 @@ func (e actionSsh) DownloadFile(localFile string) (error, string) {
 		return err, ""
 	}
 	defer client.Close()
-
-	// create destination file
-	dstFile, err := os.Create(localFile)
-	if err != nil {
-		return err, ""
-	}
-	defer dstFile.Close()
 
 	// open source file
 	srcFile, err := client.Open(remoteFile)

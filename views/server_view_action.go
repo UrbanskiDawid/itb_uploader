@@ -132,7 +132,7 @@ func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Reques
 	//remoteFile := executor..GetDownloadFileNameForAction(actionName)
 	tmpFilename := tempFile.Name()
 
-	err2, remoteFile := action.DownloadFile(tempFile.Name())
+	err2, remoteFile := action.DownloadFile(tempFile)
 	if err2 != nil {
 		logging.LogConsole(logMsg + fmt.Sprint("cant download from remote:", err2))
 		return
