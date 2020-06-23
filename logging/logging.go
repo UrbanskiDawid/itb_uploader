@@ -10,9 +10,9 @@ var (
 	Log *log.Logger
 )
 
-func InitLogger() {
+func InitLogger(name string) {
 	// set location of log file
-	var logpath = "info.log"
+	var logpath = name + ".log"
 
 	flag.Parse()
 	var file, err1 = os.Create(logpath)

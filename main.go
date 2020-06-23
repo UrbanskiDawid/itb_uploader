@@ -62,7 +62,7 @@ func configInit() {
 }
 
 func main() {
-	logging.InitLogger()
+	logging.InitLogger("itb_uploader")
 	configInit()
 	runCli()
 }
