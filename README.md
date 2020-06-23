@@ -1,6 +1,5 @@
-# ITB UPLOADER 
-[![Go Report Card](https://goreportcard.com/badge/github.com/UrbanskiDawid/itb_uploader)](https://goreportcard.com/report/github.com/UrbanskiDawid/itb_uploader)
-
+# ITB UPLOADER
+[![](https://github.com/UrbanskiDawid/itb_uploader/workflows/build/badge.svg)](https://github.com/UrbanskiDawid/itb_uploader/actions?query=workflow%3Abuild)[![Go Report Card](https://goreportcard.com/badge/github.com/UrbanskiDawid/itb_uploader)](https://goreportcard.com/report/github.com/UrbanskiDawid/itb_uploader)
 
 ## REST api for ssh commands & fiels
 
