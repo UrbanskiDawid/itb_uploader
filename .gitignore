@@ -3,4 +3,5 @@ TEMP/*
 src/TEMP/
 itb_uploader.linux
 itb_uploader.exe
+itb_uploader.log
 info.log

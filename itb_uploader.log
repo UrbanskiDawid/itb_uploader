@@ -1,7 +1,0 @@
-2020/06/24 00:36:31 logging.go:30: LogFile : itb_uploader.log
-2020/06/24 00:36:31 main.go:49: config Init
-2020/06/24 00:36:31 main.go:32: configuration file found in:  /home/dave/itb_uploader.json
-2020/06/24 00:36:31 config.go:70: configuration loaded from  /home/dave/itb_uploader.json
-2020/06/24 00:36:31 config.go:74: servers found:  2
-2020/06/24 00:36:31 config.go:93: action descriptions found:  8
-2020/06/24 00:36:31 main.go:61: config: /home/dave/itb_uploader.json
