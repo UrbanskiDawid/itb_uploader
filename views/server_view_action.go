@@ -3,16 +3,16 @@ package views
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/tmp"
 )
 
 type viewMemory struct {
@@ -29,27 +29,8 @@ func Init() {
 	actionViewMemory = make(map[string]*viewMemory)
 }
 
-const tempFolder string = "TEMP"
 const formFileID string = "file"
 const maxFileSize int64 = 32 << 10
-
-func openTmpFile(postfix string) (*os.File, error) {
-	//temp folder
-	path, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	tempPath := filepath.Join(path, tempFolder)
-	os.MkdirAll(tempPath, os.ModePerm)
-
-	// Create a temporary file within our temp-images directory that follows
-	// a particular naming pattern
-	tempFile, err := ioutil.TempFile(tempPath, "upload-*-"+postfix) //handler.Filename)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return tempFile, nil
-}
 
 func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request) string {
 
@@ -70,14 +51,24 @@ func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request)
 
 	logging.LogConsole(logPrefix + fmt.Sprintf("received: '%s' uploading...", handler.Filename))
 
-	err2, remoteFile := action.UploadFile(receivedFile)
+	//create tmp file
+	tmpFile, err := tmp.OpenTmpFile("upload" + handler.Filename)
+	if err != nil {
+		logging.LogConsole(logPrefix + fmt.Sprintf("error: cant create tmp file"))
+		return "error: file read"
+	}
+	defer os.Remove(tmpFile.Name())
+	defer tmpFile.Close()
+	//LIFO
+
+	err2 := action.UploadFile(tmpFile.Name())
 	if err2 != nil {
 		logging.LogConsole(logPrefix + fmt.Sprint("upload file failed", err))
 		return "error: upload failed"
 	}
 
 	logging.LogConsole(logPrefix + "END")
-	return remoteFile
+	return action.GetDescription().FileTarget
 }
 
 func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Request) {
@@ -86,72 +77,54 @@ func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Reques
 
 	logging.LogConsole(logMsg + "begin")
 
-	//temp file
-	path, err := os.Getwd()
+	remoteBaseFileName := path.Base(action.GetDescription().FileDownload)
+
+	tmpFileName := tmp.GenerateTmpFileName(remoteBaseFileName)
+	if tmpFileName == "" {
+		logging.LogConsole(logMsg + "failed to generate tmp file name")
+		return
+	}
+
+	//============================= GET FILE ========================
+	err := action.DownloadFile(tmpFileName)
 	if err != nil {
-		logging.LogConsole(logMsg + "failed to get working dir")
+		logging.LogConsole(logMsg + fmt.Sprint("can't download from remote:", err))
 		return
 	}
-	tempPath := filepath.Join(path, tempFolder)
-	os.MkdirAll(tempPath, os.ModePerm)
-
-	// Create a temporary file within our temp-images directory that follows
-	// a particular naming pattern
-	tempFile, err := ioutil.TempFile(tempPath, "download-*")
-	if err != nil {
-		logging.LogConsole(logMsg + fmt.Sprint("can't create local temp file:", err))
-		return
-	}
-	defer os.Remove(tempFile.Name())
-	logging.LogConsole(logMsg + fmt.Sprintf("local temp file %s created", tempFile.Name()))
-
-	//remoteFile := executor..GetDownloadFileNameForAction(actionName)
-	tmpFilename := tempFile.Name()
-
-	err2, remoteFile := action.DownloadFile(tempFile)
-	if err2 != nil {
-		logging.LogConsole(logMsg + fmt.Sprint("can't download from remote:", err2))
-		return
-	}
-
 	logging.LogConsole(logMsg + "download done, sending back")
+	defer os.Remove(tmpFileName)
 
-	//fmt.Println("Client requests: " + remoteFile)
-
-	//Check if file exists and open
-	Openfile, err := os.Open(tmpFilename)
-	defer Openfile.Close() //Close after function return
+	//============================ SEND FILE =======================
+	tmpFile, err := os.Open(tmpFileName)
 	if err != nil {
-		//File not found, send 404
-		logging.LogConsole(logMsg + fmt.Sprintf("local file not found: %s", tmpFilename))
-
-		http.Error(w, "File not found.", 404)
+		logging.LogConsole(logMsg + fmt.Sprintf("local file not found: %s", tmpFileName))
 		return
 	}
+	defer tmpFile.Close()
 
-	//File is found, create and send the correct headers
-
+	//============= READ
 	//Get the Content-Type of the file
 	//Create a buffer to store the header of the file in
 	FileHeader := make([]byte, 512)
 	//Copy the headers into the FileHeader buffer
-	Openfile.Read(FileHeader)
+	tmpFile.Read(FileHeader)
 	//Get content type of file
 	FileContentType := http.DetectContentType(FileHeader)
 
 	//Get the file size
-	FileStat, _ := Openfile.Stat()                     //Get info from file
+	FileStat, _ := tmpFile.Stat()                      //Get info from file
 	FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get file size as a string
 
 	//Send the headers
-	w.Header().Set("Content-Disposition", "attachment; filename="+filepath.Base(remoteFile))
+	w.Header().Set("Content-Disposition", "attachment; filename="+path.Base(action.GetDescription().FileDownload))
 	w.Header().Set("Content-Type", FileContentType)
 	w.Header().Set("Content-Length", FileSize)
 
 	//Send the file
 	//We read 512 bytes from the file already, so we reset the offset back to 0
-	Openfile.Seek(0, 0)
-	io.Copy(w, Openfile) //'Copy' the file to the client
+	tmpFile.Seek(0, 0)
+	io.Copy(w, tmpFile) //'Copy' the file to the client
+	//==============================================================
 
 	logging.LogConsole(logMsg + "sending done")
 	return

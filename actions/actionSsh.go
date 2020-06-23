@@ -10,7 +10,9 @@ import (
 
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
+	scp "github.com/hnakamur/go-scp"
 	"github.com/pkg/sftp"
+
 	"golang.org/x/crypto/ssh"
 )
 
@@ -55,7 +57,7 @@ func getAuthMethod(pass string) (ssh.AuthMethod, error) {
 	return ssh.Password(pass), nil
 }
 
-func configureSSHforServer(server base.Server) (*ssh.Client, error) {
+func buildClientConfig(server base.Server) (*ssh.ClientConfig, error) {
 
 	auth, err := getAuthMethod(server.Auth.Pass)
 	if err != nil {
@@ -67,6 +69,17 @@ func configureSSHforServer(server base.Server) (*ssh.Client, error) {
 		User:            server.Auth.User,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Auth:            []ssh.AuthMethod{auth},
+	}
+
+	return sshConfig, nil
+}
+
+func configureSSHforServer(server base.Server) (*ssh.Client, error) {
+
+	sshConfig, err := buildClientConfig(server)
+	if err != nil {
+		logging.Log.Println("getAuthMethod failed")
+		return nil, err
 	}
 
 	host := fmt.Sprintf("%s:%d", server.Host, server.Port)
@@ -114,16 +127,48 @@ func (e actionSsh) Execute() (string, string, error) {
 	return out.String(), outErr.String(), err
 }
 
-//UploadFile send local file
-func (e actionSsh) UploadFile(localFile io.Reader) (error, string) {
+func buildSftpClient(server base.Server) (*sftp.Client, error) {
+	// connect
+	conn, err := configureSSHforServer(server)
+	if err != nil {
+		logging.LogConsole("error buildSftpClient fail")
+		return nil, err
+	}
+	defer conn.Close()
 
-	remoteFile := e.desc.FileTarget
+	// create new SFTP client
+	client, err := sftp.NewClient(conn)
+	if err != nil {
+		logging.LogConsole("error SftpNewClient")
+		return nil, err
+	}
+	return client, nil
+}
+
+func buildScpClient(server base.Server) (*scp.SCP, error) {
+
+	client, err := configureSSHforServer(server)
+	if err != nil {
+		logging.LogConsole("error buildSftpClient fail")
+		return nil, err
+	}
+
+	scpClient := scp.NewSCP(client)
+	if scpClient == nil {
+		logging.LogConsole("error ScpNewClient")
+		return nil, err
+	}
+
+	return scpClient, err
+}
+
+func uploadFileSftp(localFileName string, server base.Server, remoteFileName string) error {
 
 	//COMMON-------
-	conn, err := configureSSHforServer(e.server)
+	conn, err := configureSSHforServer(server)
 	if err != nil {
 		logging.Log.Print("sendFile configureSSHforServer fail")
-		return err, ""
+		return err
 	}
 	defer conn.Close()
 	//---
@@ -131,72 +176,127 @@ func (e actionSsh) UploadFile(localFile io.Reader) (error, string) {
 	// create new SFTP client
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		return err, ""
+		return err
 	}
 	defer client.Close()
 
 	// create destination file
-	dstFile, err := client.Create(remoteFile)
+	dstFile, err := client.Create(remoteFileName)
 	if err != nil {
-		return err, ""
+		return err
 	}
 	defer dstFile.Close()
 
-	// copy source file to destination file
-	_, err = io.Copy(dstFile, localFile)
+	// create source file
+	srcFile, err := os.Open(localFileName)
 	if err != nil {
-		return err, ""
+		return err
 	}
 
-	return nil, remoteFile
+	// copy source file to destination file
+	_, err = io.Copy(dstFile, srcFile)
+	if err != nil {
+		return err
+	}
+	//fmt.Printf("%d bytes copied\n", bytes)
+	return nil
+}
+
+func uploadFileScp(localFileName string, server base.Server, remoteFileName string) error {
+
+	clientScp, err := buildScpClient(server)
+	if err != nil {
+		logging.LogConsole(fmt.Sprintf("error: SCP fail to connect", err))
+		return err
+	}
+	clientScp.SendFile(localFileName, remoteFileName)
+	return nil
+
+}
+
+//UploadFile send local file
+func (e actionSsh) UploadFile(localFileName string) error {
+
+	remoteFileName := e.desc.FileTarget
+
+	err := uploadFileSftp(localFileName, e.server, remoteFileName)
+	if err == nil {
+		return nil
+	}
+	//SFTP CLIENT
+	return uploadFileScp(localFileName, e.server, remoteFileName)
 }
 
 //DownloadFile get remote file
-func (e actionSsh) DownloadFile(dstFile *os.File) (error, string) {
-
-	defer dstFile.Close()
-
-	remoteFile := e.desc.FileDownload
+func downloadFileSftp(localFileName string, server base.Server, remoteFile string) error {
 
 	// connect
-	conn, err := configureSSHforServer(e.server)
+	conn, err := configureSSHforServer(server)
 	if err != nil {
-		logging.LogConsole("sendFile configureSSHforServer fail")
-		return err, ""
+		logging.Log.Print("sendFile configureSSHforServer fail")
+		return err
 	}
 	defer conn.Close()
 
 	// create new SFTP client
 	client, err := sftp.NewClient(conn)
 	if err != nil {
-		logging.LogConsole("error NewClien")
-		return err, ""
+		return err
 	}
 	defer client.Close()
+
+	// create destination file
+	dstFile, err := os.Create(localFileName)
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
 
 	// open source file
 	srcFile, err := client.Open(remoteFile)
 	if err != nil {
-		logging.LogConsole("error client.Open")
-		return err, ""
+		return err
 	}
 
 	// copy source file to destination file
-	bytesWriten, err := io.Copy(dstFile, srcFile)
+	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
-		logging.LogConsole(fmt.Sprintf("io.CopyFailed after %dbytes", bytesWriten))
-		return err, ""
+		return err
 	}
 	//fmt.Printf("%d bytes copied\n", bytes)
 
 	// flush in-memory copy
 	err = dstFile.Sync()
 	if err != nil {
-		logging.LogConsole("Sync failed")
-		return err, ""
+		return err
 	}
 
-	return nil, remoteFile
+	return nil
+}
+
+func downloadFileScp(localFileName string, server base.Server, remoteFile string) error {
+	clientScp, err := buildScpClient(server)
+	if err != nil {
+		logging.LogConsole(fmt.Sprintf("error: SCP fail to connect", err))
+		return err
+	}
+
+	err = clientScp.ReceiveFile(remoteFile, localFileName)
+	if err != nil {
+		logging.LogConsole(fmt.Sprintf("error: SCP fail while copying file", err))
+		return err
+	}
+	return nil
+}
+
+func (e actionSsh) DownloadFile(localFile string) error {
+
+	remoteFile := e.desc.FileDownload
+	err := downloadFileSftp(localFile, e.server, remoteFile)
+	if err == nil {
+		return nil
+	}
+	return downloadFileScp(localFile, e.server, remoteFile)
 }
 
 func (e actionSsh) GetDescription() base.Description {

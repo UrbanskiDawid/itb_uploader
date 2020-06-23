@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
+	"path"
 	"strconv"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions"
@@ -12,28 +11,6 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/views"
 	"github.com/spf13/cobra"
 )
-
-var tempFolder = "TEMP"
-
-func openTmpFile() (*os.File, error) {
-	//temp file
-	path, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	tempPath := filepath.Join(path, tempFolder)
-	os.MkdirAll(tempPath, os.ModePerm)
-
-	// Create a temporary file within our temp-images directory that follows
-	// a particular naming pattern
-	tempFile, err := ioutil.TempFile(tempPath, "download-*")
-	if err != nil {
-		return nil, err
-	}
-
-	//defer os.Remove(tempFile.Name())
-	return tempFile, nil
-}
 
 func buildCommand(action base.Action) *cobra.Command {
 
@@ -45,18 +22,14 @@ func buildCommand(action base.Action) *cobra.Command {
 
 			if description.HasUploadFile() {
 
-				localFile, err := os.Open(args[1])
-				if err != nil {
-					print(err)
-					os.Exit(1)
-				}
-				defer localFile.Close()
+				localFileName := args[0]
 
-				err, _ = action.UploadFile(localFile)
+				err := action.UploadFile(localFileName)
 				if err != nil {
 					print(err)
 					os.Exit(1)
 				}
+				fmt.Printf("file %s sent to %s@%s", localFileName, action.GetDescription().Server, action.GetDescription().FileTarget)
 			}
 
 			if description.HasCommand() {
@@ -70,18 +43,15 @@ func buildCommand(action base.Action) *cobra.Command {
 
 			if description.HasDownloadFile() {
 
-				tmpFile, err := openTmpFile()
-				if err != nil {
-					print("file download err", err)
-				}
-				defer tmpFile.Close()
+				remoteFileBaseName := path.Base(action.GetDescription().FileDownload)
+				outFileName := path.Join(".", remoteFileBaseName)
 
-				err, fn := action.DownloadFile(tmpFile)
+				err := action.DownloadFile(outFileName)
 				if err != nil {
 					print("ERROR", err)
 					os.Exit(1)
 				}
-				println("new file:", tmpFile.Name(), fn)
+				println("new file:", outFileName)
 			}
 		},
 	}

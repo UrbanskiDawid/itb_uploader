@@ -77,44 +77,54 @@ func copyFileLocal(src, dst string) error {
 	return out.Close()
 }
 
-func (e ActionLocal) UploadFile(localFile io.Reader) (error, string) {
+func (e ActionLocal) UploadFile(localFileName string) error {
 	dst := e.desc.FileTarget
 
 	out, err := os.Create(dst)
 	if err != nil {
-		return err, ""
+		return err
 	}
 	defer out.Close()
 
-	_, err = io.Copy(out, localFile)
+	fn, err := os.Open(localFileName)
 	if err != nil {
-		return err, ""
+		return err
+	}
+	defer fn.Close()
+
+	_, err = io.Copy(out, fn)
+	if err != nil {
+		return err
 	}
 
-	return nil, dst
+	return nil
 }
 
-func (e ActionLocal) DownloadFile(outFile *os.File) (error, string) {
+func (e ActionLocal) DownloadFile(outFileName string) error {
 	src := e.desc.FileDownload
 
-	defer outFile.Close()
-
 	if !fileExists(src) {
-		return errors.New("file '" + src + "' does not exist"), ""
+		return errors.New("file '" + src + "' does not exist")
 	}
 
 	in, err := os.Open(src)
 	if err != nil {
-		return err, ""
+		return err
 	}
 	defer in.Close()
 
-	_, err = io.Copy(outFile, in)
+	fn, err := os.OpenFile(outFileName, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		return err, ""
+		return err
+	}
+	defer fn.Close()
+
+	_, err = io.Copy(fn, in)
+	if err != nil {
+		return err
 	}
 
-	return nil, src
+	return nil
 }
 
 func (e ActionLocal) GetDescription() base.Description {
