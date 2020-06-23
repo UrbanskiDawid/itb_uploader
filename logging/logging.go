@@ -2,6 +2,7 @@ package logging
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 )
@@ -9,6 +10,11 @@ import (
 var (
 	Log *log.Logger
 )
+
+func LogConsole(logMsg string) {
+	Log.Println(logMsg)
+	fmt.Println(logMsg)
+}
 
 func InitLogger(name string) {
 	// set location of log file

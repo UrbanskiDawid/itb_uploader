@@ -149,11 +149,11 @@ func (e actionSsh) UploadFile(localFile string) (error, string) {
 	}
 
 	// copy source file to destination file
-	bytes, err := io.Copy(dstFile, srcFile)
+	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
 		return err, ""
 	}
-	fmt.Printf("%d bytes copied\n", bytes)
+	//fmt.Printf("%d bytes copied\n", bytes)
 	return nil, remoteFile
 }
 
@@ -191,11 +191,11 @@ func (e actionSsh) DownloadFile(localFile string) (error, string) {
 	}
 
 	// copy source file to destination file
-	bytes, err := io.Copy(dstFile, srcFile)
+	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
 		return err, ""
 	}
-	fmt.Printf("%d bytes copied\n", bytes)
+	//fmt.Printf("%d bytes copied\n", bytes)
 
 	// flush in-memory copy
 	err = dstFile.Sync()

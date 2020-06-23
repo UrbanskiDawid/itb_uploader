@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
@@ -80,31 +81,39 @@ func SaveFile(r *http.Request) (string, error) {
 
 func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request) string {
 
+	logging.LogConsole(fmt.Sprint("runActionUpload() file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server))
+
 	fileName, err := SaveFile(r)
 	if err != nil {
-		fmt.Fprint(w, "file error")
+		logging.LogConsole(fmt.Sprintf("upload failed to recive file"))
+		fmt.Fprint(w, "please upload file")
 		return ""
 	}
 	defer os.Remove(fileName)
 
-	logging.Log.Println("uploading file: ", fileName)
-	fmt.Println("uploading file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server)
+	logging.LogConsole(fmt.Sprint("uploading file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server))
 
 	err2, remoteFile := action.UploadFile(fileName)
 	if err2 != nil {
 
-		logging.Log.Println("fail", err2)
-		fmt.Println("fail: ", err2)
+		logging.LogConsole(fmt.Sprint("upload file failed", err))
 		return "fail"
 	}
+
+	logging.LogConsole(fmt.Sprint("uploading file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server, "OK"))
 	return remoteFile
 }
 
 func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Request) {
 
+	logMsg := fmt.Sprintf("runActionDownload() ['%s' from '%s'] ", action.GetDescription().FileDownload, action.GetDescription().Server)
+
+	logging.LogConsole(logMsg + "begin")
+
 	//temp file
 	path, err := os.Getwd()
 	if err != nil {
+		logging.LogConsole(logMsg + "failed to get working dir")
 		return
 	}
 	tempPath := filepath.Join(path, tempFolder)
@@ -114,20 +123,22 @@ func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Reques
 	// a particular naming pattern
 	tempFile, err := ioutil.TempFile(tempPath, "download-*")
 	if err != nil {
-		fmt.Println(err)
+		logging.LogConsole(logMsg + fmt.Sprint("can't create local temp file:", err))
 		return
 	}
 	defer os.Remove(tempFile.Name())
+	logging.LogConsole(logMsg + fmt.Sprintf("local temp file %s created", tempFile.Name()))
 
 	//remoteFile := executor..GetDownloadFileNameForAction(actionName)
 	tmpFilename := tempFile.Name()
 
 	err2, remoteFile := action.DownloadFile(tempFile.Name())
 	if err2 != nil {
-		logging.Log.Println("fail", err2)
-		fmt.Println("fail: ", err2)
+		logging.LogConsole(logMsg + fmt.Sprint("cant download from remote:", err2))
 		return
 	}
+
+	logging.LogConsole(logMsg + "download done, sending back")
 
 	//fmt.Println("Client requests: " + remoteFile)
 
@@ -136,6 +147,8 @@ func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Reques
 	defer Openfile.Close() //Close after function return
 	if err != nil {
 		//File not found, send 404
+		logging.LogConsole(logMsg + fmt.Sprintf("local file not found: %s", tmpFilename))
+
 		http.Error(w, "File not found.", 404)
 		return
 	}
@@ -163,18 +176,24 @@ func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Reques
 	//We read 512 bytes from the file already, so we reset the offset back to 0
 	Openfile.Seek(0, 0)
 	io.Copy(w, Openfile) //'Copy' the file to the client
-	return
 
+	logging.LogConsole(logMsg + "sending done")
+	return
 }
 
 func runActionCommand(action base.Action, w http.ResponseWriter, r *http.Request) string {
+
+	logPrefix := fmt.Sprintf("runActionCommand() action:%s cmd:%s ", action.GetDescription().Name, action.GetDescription().Cmd)
+
+	logging.LogConsole(logPrefix + "BEGIN")
+
 	stdOut, stdErr, err := action.Execute()
+
+	logging.LogConsole(logPrefix + fmt.Sprintf("stdOut:%s end stdErr:%s", strings.ReplaceAll(stdOut, "\n", "\\n"), strings.ReplaceAll(stdErr, "\n", "\\n")))
+
 	if err == nil {
 		return stdErr
 	}
-
-	logging.Log.Println("runAction cmd: ", action.GetDescription().Name, "end")
-	fmt.Println("runAction cmd:", action.GetDescription().Name, "end")
 	return stdOut
 }
 
@@ -217,9 +236,9 @@ func BuildViewAction(action base.Action) func(w http.ResponseWriter, r *http.Req
 		running: false}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		logging.Log.Println("ViewAction", actionName)
-		fmt.Println("Request ViewAction", actionName)
 
+		logging.LogConsole("ViewAction" + actionName + " BEGIN")
 		runAction(action, w, r)
+		logging.LogConsole("ViewAction" + actionName + " END")
 	}
 }
