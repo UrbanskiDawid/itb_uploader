@@ -161,7 +161,7 @@ func (e actionSsh) DownloadFile(dstFile *os.File) (error, string) {
 	// connect
 	conn, err := configureSSHforServer(e.server)
 	if err != nil {
-		logging.Log.Print("sendFile configureSSHforServer fail")
+		logging.LogConsole("sendFile configureSSHforServer fail")
 		return err, ""
 	}
 	defer conn.Close()
@@ -169,6 +169,7 @@ func (e actionSsh) DownloadFile(dstFile *os.File) (error, string) {
 	// create new SFTP client
 	client, err := sftp.NewClient(conn)
 	if err != nil {
+		logging.LogConsole("error NewClien")
 		return err, ""
 	}
 	defer client.Close()
@@ -176,12 +177,14 @@ func (e actionSsh) DownloadFile(dstFile *os.File) (error, string) {
 	// open source file
 	srcFile, err := client.Open(remoteFile)
 	if err != nil {
+		logging.LogConsole("error client.Open")
 		return err, ""
 	}
 
 	// copy source file to destination file
-	_, err = io.Copy(dstFile, srcFile)
+	bytesWriten, err := io.Copy(dstFile, srcFile)
 	if err != nil {
+		logging.LogConsole(fmt.Sprintf("io.CopyFailed after %dbytes", bytesWriten))
 		return err, ""
 	}
 	//fmt.Printf("%d bytes copied\n", bytes)
@@ -189,6 +192,7 @@ func (e actionSsh) DownloadFile(dstFile *os.File) (error, string) {
 	// flush in-memory copy
 	err = dstFile.Sync()
 	if err != nil {
+		logging.LogConsole("Sync failed")
 		return err, ""
 	}
 

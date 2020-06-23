@@ -23,13 +23,16 @@
             "problemMatcher": []
         },
         {
-            "label": "Request: download file",     
+            "label": "Request: download1",
             "command": "curl",
-            "args": [
-                "-F",
-                "file=@config.json",
-                "localhost:8080/download"
-            ],
+            "args": ["http://localhost:8080/action/download1"],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Request: download2",
+            "command": "curl",
+            "args": ["http://localhost:8080/action/download2"],
             "presentation": { "reveal": "never" },
             "problemMatcher": []
         },
@@ -37,7 +40,7 @@
             "label": "Request: upload file",     
             "command": "curl",
             "args": [
-                "-F", "file=@config.json",
+                "-F", "file=@testFile",
                 "-F", "target=/aaa/bb/cc/" ,
                 "localhost:8080/action/upload"
             ],
