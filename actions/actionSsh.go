@@ -115,7 +115,7 @@ func (e actionSsh) Execute() (string, string, error) {
 }
 
 //UploadFile send local file
-func (e actionSsh) UploadFile(localFile string) (error, string) {
+func (e actionSsh) UploadFile(localFile io.Reader) (error, string) {
 
 	remoteFile := e.desc.FileTarget
 
@@ -142,18 +142,12 @@ func (e actionSsh) UploadFile(localFile string) (error, string) {
 	}
 	defer dstFile.Close()
 
-	// create source file
-	srcFile, err := os.Open(localFile)
+	// copy source file to destination file
+	_, err = io.Copy(dstFile, localFile)
 	if err != nil {
 		return err, ""
 	}
 
-	// copy source file to destination file
-	_, err = io.Copy(dstFile, srcFile)
-	if err != nil {
-		return err, ""
-	}
-	//fmt.Printf("%d bytes copied\n", bytes)
 	return nil, remoteFile
 }
 

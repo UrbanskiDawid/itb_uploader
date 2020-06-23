@@ -44,7 +44,15 @@ func buildCommand(action base.Action) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 
 			if description.HasUploadFile() {
-				err, _ := action.UploadFile(args[1])
+
+				localFile, err := os.Open(args[1])
+				if err != nil {
+					print(err)
+					os.Exit(1)
+				}
+				defer localFile.Close()
+
+				err, _ = action.UploadFile(localFile)
 				if err != nil {
 					print(err)
 					os.Exit(1)

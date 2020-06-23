@@ -33,74 +33,50 @@ const tempFolder string = "TEMP"
 const formFileID string = "file"
 const maxFileSize int64 = 32 << 10
 
-//source: https://medium.com/@petehouston/upload-files-with-curl-93064dcccc76
-func SaveFile(r *http.Request) (string, error) {
-	// Parse our multipart form, 10 << 20 specifies a maximum
-	// upload of 10 MB files.
-	err := r.ParseMultipartForm(maxFileSize)
-	if err != nil {
-		return "", err
-	}
-	// FormFile returns the first file for the given key `myFile`
-	// it also returns the FileHeader so we can get the Filename,
-	// the Header and the size of the file
-	file, handler, err := r.FormFile(formFileID)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
+func openTmpFile(postfix string) (*os.File, error) {
 	//temp folder
 	path, err := os.Getwd()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	tempPath := filepath.Join(path, tempFolder)
 	os.MkdirAll(tempPath, os.ModePerm)
 
 	// Create a temporary file within our temp-images directory that follows
 	// a particular naming pattern
-	tempFile, err := ioutil.TempFile(tempPath, "upload-*-"+handler.Filename)
+	tempFile, err := ioutil.TempFile(tempPath, "upload-*-"+postfix) //handler.Filename)
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer tempFile.Close()
-
-	// read all of the contents of our uploaded file into a
-	// byte array
-	fileBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return "", err
-	}
-	// write this byte array to our temporary file
-	tempFile.Write(fileBytes)
-
-	fullFileName := tempFile.Name() // filepath.Join(".", tempFile.Name())
-	return fullFileName, nil
+	return tempFile, nil
 }
 
 func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request) string {
 
-	logging.LogConsole(fmt.Sprint("runActionUpload() file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server))
+	logPrefix := fmt.Sprintf("runActionUpload() [%s@%s] ", action.GetDescription().FileTarget, action.GetDescription().Server)
+	logging.LogConsole(logPrefix + "BEGIN")
 
-	fileName, err := SaveFile(r)
+	err := r.ParseMultipartForm(maxFileSize)
 	if err != nil {
-		logging.LogConsole(fmt.Sprintf("upload failed to recive file"))
-		fmt.Fprint(w, "please upload file")
-		return ""
+		logging.LogConsole(logPrefix + fmt.Sprintf("erorr: missing file"))
+		return "error: missing file"
 	}
-	defer os.Remove(fileName)
+	receivedFile, handler, err := r.FormFile(formFileID)
+	if err != nil {
+		logging.LogConsole(logPrefix + fmt.Sprintf("error: file read"))
+		return "error: file read"
+	}
+	defer receivedFile.Close()
 
-	logging.LogConsole(fmt.Sprint("uploading file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server))
+	logging.LogConsole(logPrefix + fmt.Sprintf("received: '%s' uploading...", handler.Filename))
 
-	err2, remoteFile := action.UploadFile(fileName)
+	err2, remoteFile := action.UploadFile(receivedFile)
 	if err2 != nil {
-
-		logging.LogConsole(fmt.Sprint("upload file failed", err))
-		return "fail"
+		logging.LogConsole(logPrefix + fmt.Sprint("upload file failed", err))
+		return "error: upload failed"
 	}
 
-	logging.LogConsole(fmt.Sprint("uploading file: ", action.GetDescription().FileTarget, " to "+action.GetDescription().Server, "OK"))
+	logging.LogConsole(logPrefix + "END")
 	return remoteFile
 }
 

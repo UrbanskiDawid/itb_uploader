@@ -77,9 +77,21 @@ func copyFileLocal(src, dst string) error {
 	return out.Close()
 }
 
-func (e ActionLocal) UploadFile(localFile string) (error, string) {
-	target := e.desc.FileTarget
-	return copyFileLocal(localFile, target), target
+func (e ActionLocal) UploadFile(localFile io.Reader) (error, string) {
+	dst := e.desc.FileTarget
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err, ""
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, localFile)
+	if err != nil {
+		return err, ""
+	}
+
+	return nil, dst
 }
 
 func (e ActionLocal) DownloadFile(outFile *os.File) (error, string) {
