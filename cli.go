@@ -81,8 +81,13 @@ func runCli() {
 			if len(args) == 1 {
 				port, _ = strconv.ParseUint(args[0], 10, 64)
 			}
-			views.StartServer(port)
-			os.Exit(1)
+			err := views.StartServer(port)
+			if err != nil {
+				fmt.Println("server failed", err)
+				logger.Fatal("server failed", err)
+				os.Exit(1)
+			}
+			os.Exit(0)
 		},
 	}
 

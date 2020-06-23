@@ -17,7 +17,7 @@ func generateUserVisibleActionName(name string) string {
 	return ret
 }
 
-func StartServer(port uint64) {
+func StartServer(port uint64) error {
 
 	Init()
 
@@ -38,5 +38,6 @@ func StartServer(port uint64) {
 
 	fmt.Println("starting server port", port)
 	logging.Log.Println("starting server port", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+
+	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
