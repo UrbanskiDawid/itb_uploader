@@ -1,4 +1,8 @@
-# automation run commands on remote or local machines
+# ITB UPLOADER 
+[![Go Report Card](https://goreportcard.com/badge/github.com/UrbanskiDawid/itb_uploader)](https://goreportcard.com/report/github.com/UrbanskiDawid/itb_uploader)
+
+
+## REST api for ssh commands & fiels
 
 # WARNING
 
