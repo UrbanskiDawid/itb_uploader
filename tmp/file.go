@@ -2,12 +2,9 @@ package tmp
 
 import (
 	"os"
-	"path"
 
 	"github.com/google/uuid"
 )
-
-var FOLDER = "TMP"
 
 func OpenTmpFile(postfix string) *os.File {
 	fn := GenerateTmpFileName(postfix)
@@ -19,5 +16,5 @@ func OpenTmpFile(postfix string) *os.File {
 }
 
 func GenerateTmpFileName(postFix string) string {
-	return path.Join(FOLDER, "tmp_"+uuid.New().String()+"_"+postFix)
+	return "tmp_" + uuid.New().String() + "_"
 }
