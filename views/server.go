@@ -3,19 +3,10 @@ package views
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
-
-func generateUserVisibleActionName(name string) string {
-	var ret string
-	ret = name
-	ret = strings.ToLower(ret)
-	ret = strings.ReplaceAll(ret, " ", "_")
-	return ret
-}
 
 func StartServer(port uint64) error {
 
