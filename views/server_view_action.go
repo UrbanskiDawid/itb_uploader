@@ -52,9 +52,9 @@ func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request)
 	logging.LogConsole(logPrefix + fmt.Sprintf("received: '%s' uploading...", handler.Filename))
 
 	//create tmp file
-	tmpFile := tmp.OpenTmpFile("upload" + handler.Filename)
-	if tmpFile == nil {
-		logging.LogConsole(logPrefix + fmt.Sprintf("error: cant create tmp file"))
+	tmpFile, err := tmp.OpenTmpFile("upload" + handler.Filename)
+	if err != nil {
+		logging.LogConsole(logPrefix + fmt.Sprintf("error: can't create tmp file", err))
 		return "error: file read"
 	}
 	defer os.Remove(tmpFile.Name())
@@ -160,8 +160,15 @@ func runAction(action base.Action, w http.ResponseWriter, r *http.Request) {
 		defer mem.lock.Unlock()
 
 		if action.GetDescription().HasUploadFile() {
-			mem.out = runActionUpload(action, w, r)
-			fmt.Fprint(w, mem.out)
+			if r.Method == "GET" {
+				fmt.Fprint(w, "<html>")
+				fmt.Fprint(w, "<form method='post' enctype='multipart/form-data'><input type='file' name='file' id='file'><input type='submit' value='upload'></form>")
+				fmt.Fprint(w, "</html>")
+			}
+			if r.Method == "POST" {
+				mem.out = runActionUpload(action, w, r)
+				fmt.Fprint(w, mem.out)
+			}
 		}
 		if action.GetDescription().HasDownloadFile() {
 			runActionDownload(action, w, r)

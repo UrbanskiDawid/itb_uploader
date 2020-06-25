@@ -3,6 +3,7 @@ package tmp
 import (
 	"os"
 	"path"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -21,15 +22,16 @@ func MoveAppWorkingDirecotryToTmp() {
 	}
 }
 
-func OpenTmpFile(postfix string) *os.File {
+func OpenTmpFile(postfix string) (*os.File, error) {
 	fn := GenerateTmpFileName(postfix)
-	f, err := os.Open(fn)
+	f, err := os.OpenFile(fn, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return f
+	return f, nil
 }
 
 func GenerateTmpFileName(postFix string) string {
-	return "tmp_" + uuid.New().String() + "_"
+	return "tmp_" + strings.ReplaceAll(uuid.New().String(), "-", "") + "_" + postFix
+
 }

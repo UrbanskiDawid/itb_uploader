@@ -40,9 +40,8 @@
             "label": "Request: upload file",     
             "command": "curl",
             "args": [
-                "-F", "file=@testFile",
-                "-F", "target=/aaa/bb/cc/" ,
-                "localhost:8080/action/upload"
+                "-F", "file=@config.json",
+                "localhost:8080/action/upload_local"
             ],
             "presentation": { "reveal": "never" },
             "problemMatcher": []
