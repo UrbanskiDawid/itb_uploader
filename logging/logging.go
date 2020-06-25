@@ -1,31 +1,38 @@
 package logging
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var (
-	Log *log.Logger
+	Logger *log.Logger
 )
 
 func LogConsole(logMsg string) {
-	Log.Println(logMsg)
+	//errLog..Write(logMsg)
+	Logger.Print(logMsg)
 	fmt.Println(logMsg)
 }
 
-func InitLogger(name string) {
-	// set location of log file
-	var logpath = name + ".log"
+func InitLogger(logFileName string) {
 
-	flag.Parse()
-	var file, err1 = os.Create(logpath)
+	e, err := os.OpenFile(logFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 
-	if err1 != nil {
-		panic(err1)
+	if err != nil {
+		fmt.Printf("error opening file: %v", err)
+		os.Exit(1)
 	}
-	Log = log.New(file, "", log.LstdFlags|log.Lshortfile)
-	Log.Println("LogFile : " + logpath)
+	Logger = log.New(e, "", log.Ldate|log.Ltime)
+
+	Logger.SetOutput(&lumberjack.Logger{
+		Filename:   logFileName,
+		MaxSize:    1,  // megabytes after which new file is created
+		MaxBackups: 3,  // number of backups
+		MaxAge:     28, //days
+	})
+
 }

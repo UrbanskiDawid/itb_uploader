@@ -21,7 +21,7 @@ func (e ActionLocal) Execute() (string, string, error) {
 
 	cmd := e.desc.Cmd
 
-	logging.Log.Println("executeLocal", cmd)
+	logging.LogConsole("executeLocal: " + cmd)
 
 	var out bytes.Buffer
 	var outErr bytes.Buffer
@@ -38,13 +38,13 @@ func (e ActionLocal) Execute() (string, string, error) {
 
 	err := exe.Start()
 	if err != nil {
-		logging.Log.Println("executeLocal failed to start", err)
+		logging.Logger.Print("executeLocal failed to start", err)
 		return "", "", err
 	}
 
 	err = exe.Wait()
 	if err != nil {
-		logging.Log.Printf("executeLocal failed at wait %s\n", outErr.String())
+		logging.Logger.Printf("executeLocal failed at wait %s\n", outErr.String())
 	}
 
 	return out.String(), outErr.String(), err

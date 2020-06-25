@@ -8,4 +8,5 @@ require (
 	github.com/pkg/sftp v1.11.0
 	github.com/spf13/cobra v1.0.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

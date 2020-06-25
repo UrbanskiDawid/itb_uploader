@@ -37,7 +37,7 @@ func StartServer(port uint64) error {
 	}
 
 	fmt.Println("starting server port", port)
-	logging.Log.Println("starting server port", port)
+	logging.Logger.Print("starting server port", port)
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }

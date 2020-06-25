@@ -1,6 +1,10 @@
 package base
 
-import "github.com/UrbanskiDawid/itb_uploader/logging"
+import (
+	"fmt"
+
+	"github.com/UrbanskiDawid/itb_uploader/logging"
+)
 
 //ActionConfiguration that can be done on server
 type Description struct {
@@ -28,10 +32,10 @@ func (a Description) HasCommand() bool {
 }
 
 func printAction(id int, action *Description) {
-	logging.Log.Println("Action #", id)
-	logging.Log.Println("Action name: ", action.Name)
-	logging.Log.Println("Action server: ", action.Server)
-	logging.Log.Println("Action target", action.FileTarget)
-	logging.Log.Println("Action upload [file]:", action.FileTarget)
-	logging.Log.Println("Action download [file]:", action.FileDownload)
+	logging.LogConsole(fmt.Sprintf("Action #%d", id))
+	logging.LogConsole(fmt.Sprintf("Action name: %s", action.Name))
+	logging.LogConsole(fmt.Sprintf("Action server: %s", action.Server))
+	logging.LogConsole(fmt.Sprintf("Action target %s", action.FileTarget))
+	logging.LogConsole(fmt.Sprintf("Action upload [file]: %s", action.FileTarget))
+	logging.LogConsole(fmt.Sprintf("Action download [file]: %s", action.FileDownload))
 }

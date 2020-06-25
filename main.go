@@ -30,10 +30,10 @@ func findConfigFileName() (string, error) {
 	if err == nil {
 		fn := path.Join(usr.HomeDir, "itb_uploader.json")
 		if fileExists(fn) {
-			logging.Log.Println("configuration file found in: ", fn)
+			logging.Logger.Print("configuration file found in: ", fn)
 			return fn, nil
 		} else {
-			logging.Log.Println("configuration file not found in: ", fn)
+			logging.Logger.Print("configuration file not found in: ", fn)
 		}
 	}
 
@@ -47,7 +47,7 @@ func findConfigFileName() (string, error) {
 }
 
 func configInit() {
-	logging.Log.Println("config Init")
+	logging.Logger.Print("config Init")
 
 	configFileName, err := findConfigFileName()
 	if err != nil {
@@ -59,11 +59,11 @@ func configInit() {
 		panic(err)
 	}
 
-	logging.Log.Println("config:", configFileName)
+	logging.Logger.Print("config:", configFileName)
 }
 
 func main() {
-	logging.InitLogger("itb_uploader")
+	logging.InitLogger("itb_uploader.log")
 	configInit()
 
 	tmp.MoveAppWorkingDirecotryToTmp()

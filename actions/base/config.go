@@ -3,6 +3,7 @@ package base
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -67,11 +68,11 @@ func LoadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 	if err != nil {
 		return err, nil
 	}
-	logging.Log.Println("configuration loaded from ", cfgFileName)
+	logging.LogConsole("configuration loaded from " + cfgFileName)
 
 	//SERVERS
 	serversNum := len(cfg.Servers)
-	logging.Log.Println("servers found: ", serversNum)
+	logging.LogConsole(fmt.Sprintf("servers found: %d", serversNum))
 	if serversNum == 0 {
 		return errors.New("no servers found in configuration"), nil
 	}
@@ -90,7 +91,8 @@ func LoadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 
 	//ACTION DESCRITIONS
 	actionsNum := len(cfg.Descriptions)
-	logging.Log.Println("action descriptions found: ", actionsNum)
+	logging.LogConsole(fmt.Sprintf("action descriptions found:%d", actionsNum))
+
 	if serversNum == 0 {
 		return errors.New("no actions descriptions found in configuration"), nil
 	}

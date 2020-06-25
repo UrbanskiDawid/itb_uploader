@@ -1,6 +1,10 @@
 package base
 
-import "github.com/UrbanskiDawid/itb_uploader/logging"
+import (
+	"fmt"
+
+	"github.com/UrbanskiDawid/itb_uploader/logging"
+)
 
 //Server definition of remote machine
 type Server struct {
@@ -16,10 +20,10 @@ type Credentials struct {
 }
 
 func printServer(id int, server *Server) {
-	logging.Log.Println("Server #", id)
-	logging.Log.Println("Server Nick: ", server.NickName)
-	logging.Log.Println("Server Host: ", server.Host)
-	logging.Log.Println("Server User: ", server.Auth.User)
-	logging.Log.Println("Server Pass: ", server.Auth.Pass)
-	logging.Log.Println("Server port: ", server.Port)
+	logging.LogConsole(fmt.Sprintf("Server #%d", id))
+	logging.LogConsole("Server Nick: " + server.NickName)
+	logging.LogConsole("Server Host: " + server.Host)
+	logging.LogConsole("Server User: " + server.Auth.User)
+	logging.LogConsole("Server Pass: " + server.Auth.Pass)
+	logging.LogConsole(fmt.Sprintf("Server port: %d", server.Port))
 }

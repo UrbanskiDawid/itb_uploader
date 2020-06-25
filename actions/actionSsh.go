@@ -58,7 +58,7 @@ func buildClientConfig(server base.Server) (*ssh.ClientConfig, error) {
 
 	auth, err := getAuthMethod(server.Auth.Pass)
 	if err != nil {
-		logging.Log.Println("getAuthMethod failed")
+		logging.Logger.Println("getAuthMethod failed")
 		return nil, err
 	}
 
@@ -82,19 +82,19 @@ func (e actionSsh) Execute() (string, string, error) {
 
 	serverName := e.desc.Server
 
-	logging.Log.Println("executeSSH", serverName, "cmd", cmd)
+	logging.Logger.Println("executeSSH", serverName, "cmd", cmd)
 
 	//COMMON-------
 	client, err := configureSSHforServer(e)
 	if err != nil {
-		logging.Log.Print("executeSSH configureSSHforServer fail")
+		logging.Logger.Print("executeSSH configureSSHforServer fail")
 		return "", "", err
 	}
 	defer client.Close()
 
 	session, err := client.NewSession()
 	if err != nil {
-		logging.Log.Print("executeSSH NewSession fail")
+		logging.Logger.Print("executeSSH NewSession fail")
 		return "", "", err
 	}
 	defer session.Close()
@@ -108,7 +108,7 @@ func (e actionSsh) Execute() (string, string, error) {
 
 	err = session.Start(cmd)
 	if err != nil {
-		logging.Log.Print("executeSSH start fail")
+		logging.Logger.Print("executeSSH start fail")
 		return out.String(), outErr.String(), err
 	}
 	defer session.Close()
