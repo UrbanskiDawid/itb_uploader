@@ -233,7 +233,7 @@ func downloadFileSftp(localFileName string, server base.Server, remoteFile strin
 	// connect
 	conn, err := configureSSHforServer(server)
 	if err != nil {
-		logging.Log.Print("sendFile configureSSHforServer fail")
+		logging.LogConsole(fmt.Sprint("downloadFileSftp configureSSHforServer fail", err))
 		return err
 	}
 	defer conn.Close()
@@ -241,6 +241,7 @@ func downloadFileSftp(localFileName string, server base.Server, remoteFile strin
 	// create new SFTP client
 	client, err := sftp.NewClient(conn)
 	if err != nil {
+		logging.LogConsole(fmt.Sprint("downloadFileSftp fail to create client", err))
 		return err
 	}
 	defer client.Close()
@@ -248,6 +249,7 @@ func downloadFileSftp(localFileName string, server base.Server, remoteFile strin
 	// create destination file
 	dstFile, err := os.Create(localFileName)
 	if err != nil {
+		logging.LogConsole(fmt.Sprint("downloadFileSftp fail to create localFileName", err))
 		return err
 	}
 	defer dstFile.Close()
@@ -255,12 +257,14 @@ func downloadFileSftp(localFileName string, server base.Server, remoteFile strin
 	// open source file
 	srcFile, err := client.Open(remoteFile)
 	if err != nil {
+		logging.LogConsole(fmt.Sprint("downloadFileSftp fail to open remotefile", err))
 		return err
 	}
 
 	// copy source file to destination file
 	_, err = io.Copy(dstFile, srcFile)
 	if err != nil {
+		logging.LogConsole(fmt.Sprint("downloadFileSftp fail to copy files", err))
 		return err
 	}
 	//fmt.Printf("%d bytes copied\n", bytes)
@@ -268,6 +272,7 @@ func downloadFileSftp(localFileName string, server base.Server, remoteFile strin
 	// flush in-memory copy
 	err = dstFile.Sync()
 	if err != nil {
+		logging.LogConsole(fmt.Sprint("downloadFileSftp fail sync", err))
 		return err
 	}
 
