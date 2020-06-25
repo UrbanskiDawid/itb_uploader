@@ -16,7 +16,7 @@ import (
 type actionSsh struct {
 	desc   base.Description
 	server base.Server
-	//todo ssh.ClientConfig
+	config ssh.ClientConfig
 }
 
 func fileExists(filename string) bool {
@@ -71,16 +71,9 @@ func buildClientConfig(server base.Server) (*ssh.ClientConfig, error) {
 	return sshConfig, nil
 }
 
-func configureSSHforServer(server base.Server) (*ssh.Client, error) {
-
-	sshConfig, err := buildClientConfig(server)
-	if err != nil {
-		logging.Log.Println("getAuthMethod failed")
-		return nil, err
-	}
-
-	host := fmt.Sprintf("%s:%d", server.Host, server.Port)
-	return ssh.Dial("tcp", host, sshConfig)
+func configureSSHforServer(action actionSsh) (*ssh.Client, error) {
+	host := fmt.Sprintf("%s:%d", action.server.Host, action.server.Port)
+	return ssh.Dial("tcp", host, &action.config)
 }
 
 func (e actionSsh) Execute() (string, string, error) {
@@ -92,7 +85,7 @@ func (e actionSsh) Execute() (string, string, error) {
 	logging.Log.Println("executeSSH", serverName, "cmd", cmd)
 
 	//COMMON-------
-	client, err := configureSSHforServer(e.server)
+	client, err := configureSSHforServer(e)
 	if err != nil {
 		logging.Log.Print("executeSSH configureSSHforServer fail")
 		return "", "", err
@@ -129,7 +122,7 @@ func (e actionSsh) UploadFile(localFileName string) error {
 
 	remoteFileName := e.desc.FileTarget
 
-	client, err := configureSSHforServer(e.server)
+	client, err := configureSSHforServer(e)
 	if err != nil {
 		return err
 	}
@@ -146,7 +139,7 @@ func (e actionSsh) DownloadFile(localFile string) error {
 
 	remoteFile := e.desc.FileDownload
 
-	client, err := configureSSHforServer(e.server)
+	client, err := configureSSHforServer(e)
 	if err != nil {
 		return err
 	}

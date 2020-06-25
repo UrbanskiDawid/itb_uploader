@@ -42,7 +42,12 @@ func actionBuilder(action *base.Description, server *base.Server) base.Action {
 	if action.IsLocalAction() {
 		return ActionLocal{*action}
 	}
-	return actionSsh{*action, *server}
+
+	client, err := buildClientConfig(*server)
+	if err != nil {
+		panic("server " + server.NickName + " configuration error")
+	}
+	return actionSsh{*action, *server, *client}
 }
 
 func buildAllExecutors(
