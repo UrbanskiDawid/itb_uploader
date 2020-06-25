@@ -59,6 +59,9 @@ func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request)
 	}
 	defer os.Remove(tmpFile.Name())
 	defer tmpFile.Close()
+
+	tmpFile.Seek(0, 0)
+	io.Copy(tmpFile, receivedFile) //'Copy' the file to the client
 	//LIFO
 
 	err2 := action.UploadFile(tmpFile.Name())

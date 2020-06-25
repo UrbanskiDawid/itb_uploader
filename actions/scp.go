@@ -30,7 +30,7 @@ func DownloadFileScp(localFileName string, conn *ssh.Client, remoteFile string) 
 		return errors.New("no SCP")
 	}
 
-	err := clientScp.ReceiveFile(remoteFile, localFileName)
+	err := clientScp.ReceiveFile(localFileName, remoteFile)
 	if err != nil {
 		logging.LogConsole(fmt.Sprintf("error: SCP fail while copying file", err))
 		return err
