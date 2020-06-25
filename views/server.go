@@ -8,19 +8,19 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
-func StartServer(port uint64) error {
+func StartServer(port uint64, act actions.ActionsMap) error {
 
 	actionViewMemory := BuildActionViewMemory()
 
 	http.HandleFunc("/", actionViewMemory.BuildViewIndex())
 
-	actionNames := actions.ACTIONS.GetNames()
+	actionNames := act.GetNames()
 
 	for _, name := range actionNames {
 
 		var actionName string
 		actionName = name // note must make a copy
-		action := actions.ACTIONS.GetByName(name)
+		action := act.GetByName(name)
 		http.HandleFunc("/action/"+actionName, actionViewMemory.BuildViewAction(action))
 
 		fmt.Printf("/action/" + actionName + "\n")

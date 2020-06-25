@@ -6,23 +6,20 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 )
 
-var ACTIONS ActionsMap
+type ActionsMap map[string]base.Action
 
-type ActionsMap struct {
-	all map[string]base.Action
-}
-
-func (e ActionsMap) Init() {
-	e.all = make(map[string]base.Action)
+func BuildActionMap() ActionsMap {
+	var ACTIONS = make(map[string]base.Action)
+	return ACTIONS
 }
 
 func (e ActionsMap) GetByName(name string) base.Action {
-	return e.all[name]
+	return e[name]
 }
 
 func (e ActionsMap) GetNames() []string {
-	keys := make([]string, 0, len(e.all))
-	for k := range e.all {
+	keys := make([]string, 0, len(e))
+	for k := range e {
 		keys = append(keys, k)
 	}
 	return keys
@@ -67,17 +64,18 @@ func buildAllExecutors(
 	return nil
 }
 
-func Init(jsonConfigFile string) error {
+func Init(jsonConfigFile string) (ActionsMap, error) {
+
+	ACTIONS := BuildActionMap()
 
 	err, cfg := base.LoadConfigurationFromJson(jsonConfigFile)
 	if err == nil {
 		//ACTIONS.Init()
-		ACTIONS.all = make(map[string]base.Action)
 		err := buildAllExecutors(cfg.Descriptions, cfg.Servers,
 			func(exe base.Action) {
-				ACTIONS.all[exe.GetDescription().Name] = exe
+				ACTIONS[exe.GetDescription().Name] = exe
 			})
-		return err
+		return ACTIONS, err
 	}
-	return err
+	return ACTIONS, err
 }

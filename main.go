@@ -46,7 +46,7 @@ func findConfigFileName() (string, error) {
 	return "", errors.New("no configuration file found")
 }
 
-func configInit() {
+func configInit() actions.ActionsMap {
 	logging.Logger.Print("config Init")
 
 	configFileName, err := findConfigFileName()
@@ -54,18 +54,19 @@ func configInit() {
 		panic(err)
 	}
 
-	err = actions.Init(configFileName)
+	act, err := actions.Init(configFileName)
 	if err != nil {
 		panic(err)
 	}
 
 	logging.Logger.Print("config:", configFileName)
+	return act
 }
 
 func main() {
 	logging.InitLogger("itb_uploader.log")
-	configInit()
+	act := configInit()
 
 	tmp.MoveAppWorkingDirecotryToTmp()
-	runCli()
+	runCli(act)
 }

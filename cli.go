@@ -71,7 +71,7 @@ func buildCommand(action base.Action) *cobra.Command {
 	return cmd
 }
 
-func runCli() {
+func runCli(act actions.ActionsMap) {
 
 	var rootCmd = &cobra.Command{
 		//	Use: "app"
@@ -86,7 +86,7 @@ func runCli() {
 			if len(args) == 1 {
 				port, _ = strconv.ParseUint(args[0], 10, 64)
 			}
-			err := views.StartServer(port)
+			err := views.StartServer(port, act)
 			if err != nil {
 				fmt.Println("server failed", err)
 				logger.Fatal("server failed", err)
@@ -96,9 +96,9 @@ func runCli() {
 		},
 	}
 
-	names := actions.ACTIONS.GetNames()
+	names := act.GetNames()
 	for i := 0; i < len(names); i++ {
-		executor := actions.ACTIONS.GetByName(names[i])
+		executor := act.GetByName(names[i])
 		cmd := buildCommand(executor)
 		rootCmd.AddCommand(cmd)
 	}
