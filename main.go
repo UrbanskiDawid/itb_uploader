@@ -9,6 +9,7 @@ import (
 
 	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
+	"github.com/UrbanskiDawid/itb_uploader/tmp"
 )
 
 var logger log.Logger
@@ -64,5 +65,7 @@ func configInit() {
 func main() {
 	logging.InitLogger("itb_uploader")
 	configInit()
+
+	tmp.MoveAppWorkingDirecotryToTmp()
 	runCli()
 }
