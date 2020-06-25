@@ -1,4 +1,4 @@
-package base
+package main
 
 import (
 	"encoding/json"
@@ -9,23 +9,18 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/UrbanskiDawid/itb_uploader/actions"
+	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 )
 
 //Configuration entire configuration
 type Configuration struct {
-	Servers      []Server      `json:"servers"`
-	Descriptions []Description `json:"actions"`
+	Servers      []base.Server      `json:"servers"`
+	Descriptions []base.Description `json:"actions"`
 }
 
-func loadEnv() Credentials {
-	var ret Credentials
-	ret.User = os.Getenv("SSH_USER")
-	ret.Pass = os.Getenv("SSH_PASS")
-	return ret
-}
-
-func overrideServerAuth(auth *Credentials, overrideAuth *Credentials) {
+func overrideServerAuth(auth *base.Credentials, overrideAuth *base.Credentials) {
 	if overrideAuth.User != "" {
 		auth.User = overrideAuth.User
 	}
@@ -50,7 +45,7 @@ func unifyActionName(name string) string {
 	return name
 }
 
-func LoadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
+func loadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 
 	//load MyConfiguration from file
 	jsonFile, err := os.Open(cfgFileName)
@@ -70,36 +65,58 @@ func LoadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 	}
 	logging.LogConsole("configuration loaded from " + cfgFileName)
 
-	//SERVERS
 	serversNum := len(cfg.Servers)
 	logging.LogConsole(fmt.Sprintf("servers found: %d", serversNum))
 	if serversNum == 0 {
 		return errors.New("no servers found in configuration"), nil
 	}
-	authFromEnviroment := loadEnv()
+
+	actionsNum := len(cfg.Descriptions)
+	logging.LogConsole(fmt.Sprintf("action descriptions found:%d", actionsNum))
+	if actionsNum == 0 {
+		return errors.New("no actions descriptions found in configuration"), nil
+	}
+
+	return nil, &cfg
+}
+
+func fixServersInConfiguration(cfg *Configuration) {
+
+	serversNum := len(cfg.Servers)
 
 	//Add localhost
-	var localhostServer Server
+	var localhostServer base.Server
 	localhostServer.NickName = ""
 	localhostServer.Port = 0
 	cfg.Servers = append(cfg.Servers, localhostServer)
 
 	for i := 0; i < serversNum; i++ {
-		overrideServerAuth(&cfg.Servers[i].Auth, &authFromEnviroment)
 		cfg.Servers[i].NickName = unifyServerName(cfg.Servers[i].NickName)
 	}
+}
 
-	//ACTION DESCRITIONS
+func fixActionsInConfiguration(cfg *Configuration) {
 	actionsNum := len(cfg.Descriptions)
 	logging.LogConsole(fmt.Sprintf("action descriptions found:%d", actionsNum))
 
-	if serversNum == 0 {
-		return errors.New("no actions descriptions found in configuration"), nil
-	}
 	for i := 0; i < actionsNum; i++ {
 		cfg.Descriptions[i].Server = unifyServerName(cfg.Descriptions[i].Server)
 		cfg.Descriptions[i].Name = unifyActionName(cfg.Descriptions[i].Name)
 	}
+}
 
-	return nil, &cfg
+func InitConfig(jsonConfigFile string) (actions.ActionsMap, error) {
+
+	ACTIONS := actions.BuildActionMap()
+
+	err, cfg := loadConfigurationFromJson(jsonConfigFile)
+	if err != nil {
+		return ACTIONS, err
+	}
+
+	fixServersInConfiguration(cfg)
+	fixActionsInConfiguration(cfg)
+
+	ACTIONS.BuildAllExecutors(cfg.Descriptions, cfg.Servers)
+	return ACTIONS, err
 }

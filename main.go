@@ -54,7 +54,7 @@ func configInit() actions.ActionsMap {
 		panic(err)
 	}
 
-	act, err := actions.Init(configFileName)
+	act, err := InitConfig(configFileName)
 	if err != nil {
 		panic(err)
 	}

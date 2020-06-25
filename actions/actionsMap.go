@@ -47,10 +47,7 @@ func actionBuilder(action *base.Description, server *base.Server) base.Action {
 	return actionSsh{*action, *server, *client}
 }
 
-func buildAllExecutors(
-	descriptions []base.Description,
-	servers []base.Server,
-	onNewExecutor func(base.Action)) error {
+func (e ActionsMap) BuildAllExecutors(descriptions []base.Description, servers []base.Server) error {
 
 	for i := 0; i < len(descriptions); i++ {
 		description := &descriptions[i]
@@ -58,24 +55,9 @@ func buildAllExecutors(
 		if server == nil {
 			return errors.New("cant find server for:" + description.Name)
 		}
-		onNewExecutor(actionBuilder(description, server))
+		exe := actionBuilder(description, server)
+		e[exe.GetDescription().Name] = exe
 	}
 
 	return nil
-}
-
-func Init(jsonConfigFile string) (ActionsMap, error) {
-
-	ACTIONS := BuildActionMap()
-
-	err, cfg := base.LoadConfigurationFromJson(jsonConfigFile)
-	if err == nil {
-		//ACTIONS.Init()
-		err := buildAllExecutors(cfg.Descriptions, cfg.Servers,
-			func(exe base.Action) {
-				ACTIONS[exe.GetDescription().Name] = exe
-			})
-		return ACTIONS, err
-	}
-	return ACTIONS, err
 }
