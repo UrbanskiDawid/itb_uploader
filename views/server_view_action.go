@@ -22,11 +22,11 @@ type viewMemory struct {
 	path    string
 }
 
-var actionViewMemory map[string]*viewMemory
+type ActionViewMemory map[string]*viewMemory
 
 //Init must call before using
-func Init() {
-	actionViewMemory = make(map[string]*viewMemory)
+func BuildActionViewMemory() ActionViewMemory {
+	return make(map[string]*viewMemory)
 }
 
 const formFileID string = "file"
@@ -149,7 +149,7 @@ func runActionCommand(action base.Action, w http.ResponseWriter, r *http.Request
 	return stdOut
 }
 
-func runAction(action base.Action, w http.ResponseWriter, r *http.Request) {
+func (actionViewMemory ActionViewMemory) runAction(action base.Action, w http.ResponseWriter, r *http.Request) {
 
 	mem := actionViewMemory[action.GetDescription().Name]
 
@@ -186,7 +186,7 @@ func runAction(action base.Action, w http.ResponseWriter, r *http.Request) {
 }
 
 //BuildViewAction generate function for server to handle action
-func BuildViewAction(action base.Action) func(w http.ResponseWriter, r *http.Request) {
+func (actionViewMemory ActionViewMemory) BuildViewAction(action base.Action) func(w http.ResponseWriter, r *http.Request) {
 
 	actionName := action.GetDescription().Name
 
@@ -197,7 +197,7 @@ func BuildViewAction(action base.Action) func(w http.ResponseWriter, r *http.Req
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		logging.LogConsole("ViewAction" + actionName + " BEGIN")
-		runAction(action, w, r)
+		actionViewMemory.runAction(action, w, r)
 		logging.LogConsole("ViewAction" + actionName + " END")
 	}
 }

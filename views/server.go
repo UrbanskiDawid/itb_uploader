@@ -10,10 +10,9 @@ import (
 
 func StartServer(port uint64) error {
 
-	Init()
+	actionViewMemory := BuildActionViewMemory()
 
-	http.HandleFunc("/", ViewIndex)
-	http.HandleFunc("/action/", ViewIndex)
+	http.HandleFunc("/", actionViewMemory.BuildViewIndex())
 
 	actionNames := actions.ACTIONS.GetNames()
 
@@ -22,7 +21,7 @@ func StartServer(port uint64) error {
 		var actionName string
 		actionName = name // note must make a copy
 		action := actions.ACTIONS.GetByName(name)
-		http.HandleFunc("/action/"+actionName, BuildViewAction(action))
+		http.HandleFunc("/action/"+actionName, actionViewMemory.BuildViewAction(action))
 
 		fmt.Printf("/action/" + actionName + "\n")
 	}
