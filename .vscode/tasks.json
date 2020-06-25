@@ -37,11 +37,21 @@
             "problemMatcher": []
         },
         {
-            "label": "Request: upload file",     
+            "label": "Request: upload local",     
             "command": "curl",
             "args": [
                 "-F", "file=@config.json",
                 "localhost:8080/action/upload_local"
+            ],
+            "presentation": { "reveal": "never" },
+            "problemMatcher": []
+        },
+        {
+            "label": "Request: upload remote",     
+            "command": "curl",
+            "args": [
+                "-F", "file=@config.json",
+                "localhost:8080/action/upload_remote"
             ],
             "presentation": { "reveal": "never" },
             "problemMatcher": []
