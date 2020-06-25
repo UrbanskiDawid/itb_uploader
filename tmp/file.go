@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var FOLDER = "TMP"
+var FOLDER = "TEMP"
 
 func MoveAppWorkingDirecotryToTmp() {
 
