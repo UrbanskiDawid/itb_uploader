@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -65,31 +64,17 @@ func loadConfigurationFromJson(cfgFileName string) (error, *Configuration) {
 	}
 	logging.LogConsole("configuration loaded from " + cfgFileName)
 
-	serversNum := len(cfg.Servers)
-	logging.LogConsole(fmt.Sprintf("servers found: %d", serversNum))
-	if serversNum == 0 {
-		return errors.New("no servers found in configuration"), nil
-	}
-
-	actionsNum := len(cfg.Descriptions)
-	logging.LogConsole(fmt.Sprintf("action descriptions found:%d", actionsNum))
-	if actionsNum == 0 {
-		return errors.New("no actions descriptions found in configuration"), nil
-	}
-
 	return nil, &cfg
 }
 
 func fixServersInConfiguration(cfg *Configuration) {
 
-	serversNum := len(cfg.Servers)
-
-	//Add localhost
 	var localhostServer base.Server
 	localhostServer.NickName = ""
 	localhostServer.Port = 0
 	cfg.Servers = append(cfg.Servers, localhostServer)
 
+	serversNum := len(cfg.Servers)
 	for i := 0; i < serversNum; i++ {
 		cfg.Servers[i].NickName = unifyServerName(cfg.Servers[i].NickName)
 	}
@@ -97,26 +82,30 @@ func fixServersInConfiguration(cfg *Configuration) {
 
 func fixActionsInConfiguration(cfg *Configuration) {
 	actionsNum := len(cfg.Descriptions)
-	logging.LogConsole(fmt.Sprintf("action descriptions found:%d", actionsNum))
-
 	for i := 0; i < actionsNum; i++ {
 		cfg.Descriptions[i].Server = unifyServerName(cfg.Descriptions[i].Server)
 		cfg.Descriptions[i].Name = unifyActionName(cfg.Descriptions[i].Name)
 	}
 }
 
+//InitConfig load configuration form json file
 func InitConfig(jsonConfigFile string) (actions.ActionsMap, error) {
-
-	ACTIONS := actions.BuildActionMap()
 
 	err, cfg := loadConfigurationFromJson(jsonConfigFile)
 	if err != nil {
-		return ACTIONS, err
+		return nil, err
+	}
+
+	if len(cfg.Servers) == 0 {
+		return nil, errors.New("no servers found in configuration")
+	}
+
+	if len(cfg.Descriptions) == 0 {
+		return nil, errors.New("no actions descriptions found in configuration")
 	}
 
 	fixServersInConfiguration(cfg)
 	fixActionsInConfiguration(cfg)
 
-	ACTIONS.BuildAllExecutors(cfg.Descriptions, cfg.Servers)
-	return ACTIONS, err
+	return actions.BuildActionMap(cfg.Descriptions, cfg.Servers)
 }

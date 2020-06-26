@@ -8,11 +8,6 @@ import (
 
 type ActionsMap map[string]base.Action
 
-func BuildActionMap() ActionsMap {
-	var ACTIONS = make(map[string]base.Action)
-	return ACTIONS
-}
-
 func (e ActionsMap) GetByName(name string) base.Action {
 	return e[name]
 }
@@ -47,17 +42,19 @@ func actionBuilder(action *base.Description, server *base.Server) base.Action {
 	return actionSsh{*action, *server, *client}
 }
 
-func (e ActionsMap) BuildAllExecutors(descriptions []base.Description, servers []base.Server) error {
+func BuildActionMap(descriptions []base.Description, servers []base.Server) (ActionsMap, error) {
+
+	var ACTIONS = make(map[string]base.Action)
 
 	for i := 0; i < len(descriptions); i++ {
 		description := &descriptions[i]
 		server := findServerIndex(description.Server, servers)
 		if server == nil {
-			return errors.New("cant find server for:" + description.Name)
+			return ACTIONS, errors.New("cant find server for:" + description.Name)
 		}
 		exe := actionBuilder(description, server)
-		e[exe.GetDescription().Name] = exe
+		ACTIONS[exe.GetDescription().Name] = exe
 	}
 
-	return nil
+	return ACTIONS, nil
 }
