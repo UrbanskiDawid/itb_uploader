@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/UrbanskiDawid/itb_uploader/actions/base"
+	"github.com/UrbanskiDawid/itb_uploader/actions"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 	"github.com/UrbanskiDawid/itb_uploader/tmp"
 )
@@ -32,7 +32,7 @@ func BuildActionViewMemory() ActionViewMemory {
 const formFileID string = "file"
 const maxFileSize int64 = 32 << 10
 
-func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request) string {
+func runActionUpload(action actions.Action, w http.ResponseWriter, r *http.Request) string {
 
 	logPrefix := fmt.Sprintf("runActionUpload() [%s@%s] ", action.GetDescription().FileTarget, action.GetDescription().Server)
 	logging.LogConsole(logPrefix + "BEGIN")
@@ -74,7 +74,7 @@ func runActionUpload(action base.Action, w http.ResponseWriter, r *http.Request)
 	return action.GetDescription().FileTarget
 }
 
-func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Request) {
+func runActionDownload(action actions.Action, w http.ResponseWriter, r *http.Request) {
 
 	logMsg := fmt.Sprintf("runActionDownload() ['%s' from '%s'] ", action.GetDescription().FileDownload, action.GetDescription().Server)
 
@@ -133,7 +133,7 @@ func runActionDownload(action base.Action, w http.ResponseWriter, r *http.Reques
 	return
 }
 
-func runActionCommand(action base.Action, w http.ResponseWriter, r *http.Request) string {
+func runActionCommand(action actions.Action, w http.ResponseWriter, r *http.Request) string {
 
 	logPrefix := fmt.Sprintf("runActionCommand() action:%s cmd:%s ", action.GetDescription().Name, action.GetDescription().Cmd)
 
@@ -149,7 +149,7 @@ func runActionCommand(action base.Action, w http.ResponseWriter, r *http.Request
 	return stdOut
 }
 
-func (actionViewMemory ActionViewMemory) runAction(action base.Action, w http.ResponseWriter, r *http.Request) {
+func (actionViewMemory ActionViewMemory) runAction(action actions.Action, w http.ResponseWriter, r *http.Request) {
 
 	mem := actionViewMemory[action.GetDescription().Name]
 
@@ -186,7 +186,7 @@ func (actionViewMemory ActionViewMemory) runAction(action base.Action, w http.Re
 }
 
 //BuildViewAction generate function for server to handle action
-func (actionViewMemory ActionViewMemory) BuildViewAction(action base.Action) func(w http.ResponseWriter, r *http.Request) {
+func (actionViewMemory ActionViewMemory) BuildViewAction(action actions.Action) func(w http.ResponseWriter, r *http.Request) {
 
 	actionName := action.GetDescription().Name
 

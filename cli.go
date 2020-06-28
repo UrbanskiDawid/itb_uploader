@@ -7,12 +7,11 @@ import (
 	"strconv"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions"
-	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 	"github.com/UrbanskiDawid/itb_uploader/views"
 	"github.com/spf13/cobra"
 )
 
-func buildCommand(action base.Action) *cobra.Command {
+func buildCommand(action actions.Action) *cobra.Command {
 
 	description := action.GetDescription()
 

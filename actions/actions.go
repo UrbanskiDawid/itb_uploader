@@ -9,9 +9,16 @@ import (
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 )
 
-type ActionsMap map[string]base.Action
+type Action interface {
+	Execute() (string, string, error)
+	UploadFile(string) error
+	DownloadFile(string) error
+	GetDescription() base.Description
+}
 
-func (e ActionsMap) GetByName(name string) base.Action {
+type ActionsMap map[string]Action
+
+func (e ActionsMap) GetByName(name string) Action {
 	return e[name]
 }
 
@@ -33,17 +40,17 @@ func findServerIndex(name string, servers []base.Server) *base.Server {
 	return nil
 }
 
-func actionBuilder(description *base.Description, server *base.Server) base.Action {
-	if action.IsLocalAction() {
-		return localBackend.BuildLocalBackend(description)
+func actionBuilder(description *base.Description, server *base.Server) Action {
+	if description.IsLocalAction() {
+		return localBackend.BuildLocalBackend(*description)
 	}
 
-	return sshBackend.BuildActionSsh(*action, *server)
+	return sshBackend.BuildActionSsh(*description, *server)
 }
 
 func BuildActionMap(descriptions []base.Description, servers []base.Server) (ActionsMap, error) {
 
-	var ACTIONS = make(map[string]base.Action)
+	var ACTIONS = make(map[string]Action)
 
 	for i := 0; i < len(descriptions); i++ {
 		description := &descriptions[i]
