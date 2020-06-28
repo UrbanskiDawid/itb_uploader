@@ -7,53 +7,59 @@ import (
 	"strconv"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions"
-	"github.com/UrbanskiDawid/itb_uploader/views"
+	"github.com/UrbanskiDawid/itb_uploader/server"
 	"github.com/spf13/cobra"
 )
 
-func buildCommand(action actions.Action) *cobra.Command {
+func runAction(action actions.Action, args []string) {
 
 	description := action.GetDescription()
+
+	if description.HasUploadFile() {
+
+		localFileName := args[0]
+
+		err := action.UploadFile(localFileName)
+		if err != nil {
+			print(err)
+			os.Exit(1)
+		}
+		fmt.Printf("file %s sent to %s@%s", localFileName, action.GetDescription().Server, action.GetDescription().FileTarget)
+	}
+
+	if description.HasCommand() {
+		stdOut, stdErr, err := action.Execute()
+		print(stdOut)
+		if err != nil {
+			print(stdErr)
+			os.Exit(1)
+		}
+	}
+
+	if description.HasDownloadFile() {
+
+		remoteFileBaseName := path.Base(action.GetDescription().FileDownload)
+		outFileName := path.Join(".", remoteFileBaseName)
+
+		err := action.DownloadFile(outFileName)
+		if err != nil {
+			print("ERROR", err)
+			os.Exit(1)
+		}
+		println("new file:", outFileName)
+	}
+}
+
+func buildCommand(action actions.Action) *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use: action.GetDescription().Name,
 		Run: func(cmd *cobra.Command, args []string) {
-
-			if description.HasUploadFile() {
-
-				localFileName := args[0]
-
-				err := action.UploadFile(localFileName)
-				if err != nil {
-					print(err)
-					os.Exit(1)
-				}
-				fmt.Printf("file %s sent to %s@%s", localFileName, action.GetDescription().Server, action.GetDescription().FileTarget)
-			}
-
-			if description.HasCommand() {
-				stdOut, stdErr, err := action.Execute()
-				print(stdOut)
-				if err != nil {
-					print(stdErr)
-					os.Exit(1)
-				}
-			}
-
-			if description.HasDownloadFile() {
-
-				remoteFileBaseName := path.Base(action.GetDescription().FileDownload)
-				outFileName := path.Join(".", remoteFileBaseName)
-
-				err := action.DownloadFile(outFileName)
-				if err != nil {
-					print("ERROR", err)
-					os.Exit(1)
-				}
-				println("new file:", outFileName)
-			}
+			runAction(action, args)
 		},
 	}
+
+	description := action.GetDescription()
 
 	short := description.Name
 	if description.HasUploadFile() {
@@ -85,7 +91,7 @@ func runCli(act actions.ActionsMap) {
 			if len(args) == 1 {
 				port, _ = strconv.ParseUint(args[0], 10, 64)
 			}
-			err := views.StartServer(port, act)
+			err := server.StartServer(port, act)
 			if err != nil {
 				fmt.Println("server failed", err)
 				logger.Fatal("server failed", err)
