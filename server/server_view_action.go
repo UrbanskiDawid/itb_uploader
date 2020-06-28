@@ -145,7 +145,7 @@ func runActionCommand(action actions.Action, w http.ResponseWriter, r *http.Requ
 
 	logging.LogConsole(logPrefix + fmt.Sprintf("stdOut:%s end stdErr:%s", strings.ReplaceAll(stdOut, "\n", "\\n"), strings.ReplaceAll(stdErr, "\n", "\\n")))
 
-	if err == nil {
+	if err != nil {
 		return stdErr
 	}
 	return stdOut
@@ -179,7 +179,9 @@ func (actionViewMemory ActionViewMemory) runAction(action actions.Action, w http
 			runActionDownload(action, w, r)
 		}
 		if action.GetDescription().HasCommand() {
-			mem.out = runActionCommand(action, w, r)
+			var out string
+			out = runActionCommand(action, w, r)
+			mem.out = out
 			fmt.Fprint(w, mem.out)
 		}
 
