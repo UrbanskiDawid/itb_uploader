@@ -26,8 +26,7 @@ func StartServer(port uint64, act actions.ActionsMap) error {
 		fmt.Printf("/action/" + actionName + "\n")
 	}
 
-	fmt.Println("starting server port", port)
-	logging.Logger.Print("starting server port", port)
+	logging.LogConsole(fmt.Sprint("starting server port ", port))
 
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
