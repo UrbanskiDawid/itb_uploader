@@ -139,6 +139,8 @@ func runActionCommand(action actions.Action, w http.ResponseWriter, r *http.Requ
 
 	logging.LogConsole(logPrefix + "BEGIN")
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	stdOut, stdErr, err := action.Execute()
 
 	logging.LogConsole(logPrefix + fmt.Sprintf("stdOut:%s end stdErr:%s", strings.ReplaceAll(stdOut, "\n", "\\n"), strings.ReplaceAll(stdErr, "\n", "\\n")))

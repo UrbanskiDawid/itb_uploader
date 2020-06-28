@@ -12,9 +12,9 @@ func StartServer(port uint64, act actions.ActionsMap) error {
 
 	actionViewMemory := BuildActionViewMemory()
 
-	http.HandleFunc("/", actionViewMemory.BuildViewIndex())
-
 	actionNames := act.GetNames()
+
+	http.HandleFunc("/", actionViewMemory.BuildViewIndex(actionNames))
 
 	for _, name := range actionNames {
 
