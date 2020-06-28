@@ -50,7 +50,7 @@ func runAction(action actions.Action, args []string) {
 	}
 }
 
-func buildCommand(action actions.Action) *cobra.Command {
+func buildCliCommand(action actions.Action) *cobra.Command {
 
 	var cmd = &cobra.Command{
 		Use: action.GetDescription().Name,
@@ -104,7 +104,7 @@ func runCli(act actions.ActionsMap) {
 	names := act.GetNames()
 	for i := 0; i < len(names); i++ {
 		executor := act.GetByName(names[i])
-		cmd := buildCommand(executor)
+		cmd := buildCliCommand(executor)
 		rootCmd.AddCommand(cmd)
 	}
 
