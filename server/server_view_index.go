@@ -11,14 +11,6 @@ var htmlIndex string = `<html>
 <h1>main</h1>
 `
 
-func viewError(w http.ResponseWriter, r *http.Request) {
-
-	w.WriteHeader(http.StatusNotFound)
-
-	logPrefix := fmt.Sprintf("ViewError 404 url: " + r.URL.String())
-	logging.LogConsole(logPrefix)
-}
-
 //BuildVIeBuildViewIndex show html for all actions
 func (actionViewMemory ActionViewMemory) BuildViewIndex() func(w http.ResponseWriter, r *http.Request) {
 
