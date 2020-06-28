@@ -1,4 +1,4 @@
-package actions
+package sshBackend
 
 import (
 	"bytes"
@@ -8,16 +8,23 @@ import (
 	"strings"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
-	"github.com/UrbanskiDawid/itb_uploader/actions/sshFiles"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 
 	"golang.org/x/crypto/ssh"
 )
 
-type actionSsh struct {
+type ActionSsh struct {
 	desc   base.Description
 	server base.Server
 	config ssh.ClientConfig
+}
+
+func BuildActionSsh(description base.Description, server base.Server) ActionSsh {
+	client, err := buildClientConfig(server)
+	if err != nil {
+		panic("server " + server.NickName + " configuration error")
+	}
+	return ActionSsh{description, server, *client}
 }
 
 func fileExists(filename string) bool {
@@ -72,12 +79,12 @@ func buildClientConfig(server base.Server) (*ssh.ClientConfig, error) {
 	return sshConfig, nil
 }
 
-func configureSSHforServer(action actionSsh) (*ssh.Client, error) {
+func configureSSHforServer(action ActionSsh) (*ssh.Client, error) {
 	host := fmt.Sprintf("%s:%d", action.server.Host, action.server.Port)
 	return ssh.Dial("tcp", host, &action.config)
 }
 
-func (e actionSsh) Execute() (string, string, error) {
+func (e ActionSsh) Execute() (string, string, error) {
 
 	cmd := e.desc.Cmd
 
@@ -119,7 +126,7 @@ func (e actionSsh) Execute() (string, string, error) {
 }
 
 //UploadFile send local file
-func (e actionSsh) UploadFile(localFileName string) error {
+func (e ActionSsh) UploadFile(localFileName string) error {
 
 	remoteFileName := e.desc.FileTarget
 
@@ -128,15 +135,15 @@ func (e actionSsh) UploadFile(localFileName string) error {
 		return err
 	}
 
-	err = sshFiles.UploadFileSftp(localFileName, client, remoteFileName)
+	err = UploadFileSftp(localFileName, client, remoteFileName)
 	if err == nil {
 		return nil
 	}
 	//SFTP CLIENT
-	return sshFiles.UploadFileScp(localFileName, client, remoteFileName)
+	return UploadFileScp(localFileName, client, remoteFileName)
 }
 
-func (e actionSsh) DownloadFile(localFile string) error {
+func (e ActionSsh) DownloadFile(localFile string) error {
 
 	remoteFile := e.desc.FileDownload
 
@@ -145,13 +152,13 @@ func (e actionSsh) DownloadFile(localFile string) error {
 		return err
 	}
 
-	err = sshFiles.DownloadFileSftp(localFile, client, remoteFile)
+	err = DownloadFileSftp(localFile, client, remoteFile)
 	if err == nil {
 		return nil
 	}
-	return sshFiles.DownloadFileScp(localFile, client, remoteFile)
+	return DownloadFileScp(localFile, client, remoteFile)
 }
 
-func (e actionSsh) GetDescription() base.Description {
+func (e ActionSsh) GetDescription() base.Description {
 	return e.desc
 }

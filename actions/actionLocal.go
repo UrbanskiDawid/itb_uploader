@@ -50,6 +50,14 @@ func (e ActionLocal) Execute() (string, string, error) {
 	return out.String(), outErr.String(), err
 }
 
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 // Copy the src file to dst. Any existing file will be overwritten and will not
 // copy file attributes.
 func copyFileLocal(src, dst string) error {

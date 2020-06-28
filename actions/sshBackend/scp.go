@@ -1,4 +1,4 @@
-package sshFiles
+package sshBackend
 
 import (
 	"errors"

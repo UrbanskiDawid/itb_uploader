@@ -3,6 +3,8 @@ package actions
 import (
 	"errors"
 
+	"github.com/UrbanskiDawid/itb_uploader/actions/sshBackend"
+
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
 )
 
@@ -35,11 +37,7 @@ func actionBuilder(action *base.Description, server *base.Server) base.Action {
 		return ActionLocal{*action}
 	}
 
-	client, err := buildClientConfig(*server)
-	if err != nil {
-		panic("server " + server.NickName + " configuration error")
-	}
-	return actionSsh{*action, *server, *client}
+	return sshBackend.BuildActionSsh(*action, *server)
 }
 
 func BuildActionMap(descriptions []base.Description, servers []base.Server) (ActionsMap, error) {
