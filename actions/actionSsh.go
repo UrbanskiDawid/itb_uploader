@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
+	"github.com/UrbanskiDawid/itb_uploader/actions/sshFiles"
 	"github.com/UrbanskiDawid/itb_uploader/logging"
 
 	"golang.org/x/crypto/ssh"
@@ -127,12 +128,12 @@ func (e actionSsh) UploadFile(localFileName string) error {
 		return err
 	}
 
-	err = UploadFileSftp(localFileName, client, remoteFileName)
+	err = sshFiles.UploadFileSftp(localFileName, client, remoteFileName)
 	if err == nil {
 		return nil
 	}
 	//SFTP CLIENT
-	return UploadFileScp(localFileName, client, remoteFileName)
+	return sshFiles.UploadFileScp(localFileName, client, remoteFileName)
 }
 
 func (e actionSsh) DownloadFile(localFile string) error {
@@ -144,11 +145,11 @@ func (e actionSsh) DownloadFile(localFile string) error {
 		return err
 	}
 
-	err = DownloadFileSftp(localFile, client, remoteFile)
+	err = sshFiles.DownloadFileSftp(localFile, client, remoteFile)
 	if err == nil {
 		return nil
 	}
-	return DownloadFileScp(localFile, client, remoteFile)
+	return sshFiles.DownloadFileScp(localFile, client, remoteFile)
 }
 
 func (e actionSsh) GetDescription() base.Description {

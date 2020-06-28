@@ -1,4 +1,4 @@
-package actions
+package sshFiles
 
 import (
 	"fmt"
