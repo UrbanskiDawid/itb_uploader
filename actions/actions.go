@@ -3,6 +3,7 @@ package actions
 import (
 	"errors"
 
+	"github.com/UrbanskiDawid/itb_uploader/actions/localBackend"
 	"github.com/UrbanskiDawid/itb_uploader/actions/sshBackend"
 
 	"github.com/UrbanskiDawid/itb_uploader/actions/base"
@@ -32,9 +33,9 @@ func findServerIndex(name string, servers []base.Server) *base.Server {
 	return nil
 }
 
-func actionBuilder(action *base.Description, server *base.Server) base.Action {
+func actionBuilder(description *base.Description, server *base.Server) base.Action {
 	if action.IsLocalAction() {
-		return ActionLocal{*action}
+		return localBackend.BuildLocalBackend(description)
 	}
 
 	return sshBackend.BuildActionSsh(*action, *server)

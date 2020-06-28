@@ -1,4 +1,4 @@
-package actions
+package localBackend
 
 import (
 	"bytes"
@@ -15,6 +15,10 @@ import (
 
 type ActionLocal struct {
 	desc base.Description
+}
+
+func BuildLocalBackend(descrition base.Description) ActionLocal {
+	return ActionLocal{descrition}
 }
 
 func (e ActionLocal) Execute() (string, string, error) {
